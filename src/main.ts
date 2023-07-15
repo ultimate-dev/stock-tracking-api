@@ -14,7 +14,7 @@ async function bootstrap() {
     prefix: '/public/',
     index: false,
   });
-  app.setGlobalPrefix('v1');
+
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
