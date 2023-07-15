@@ -10,194 +10,182 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       Int    @id @default(autoincrement())
-  username String
-  password String
-  name     String
-  surname  String
 
+model Company {
+  id        Int         @id @default(autoincrement())
+  name      String
+  logo      String?
   // --
-  status    Status   @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status    Status      @default(ACTIVE)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  // --
+  users     User[]
+  warehouse Warehouse[]
+  suppliers Supplier[]
+
+  @@map("companies")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  password   String
+  name       String
+  surname    String
+  // --
+  status     Status   @default(ACTIVE)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  //
+  company_id Int
+  company    Company  @relation(fields: [company_id], references: [id])
 
   @@map("users")
 }
 
-model Sube {
-  id        Int      @id @default(autoincrement())
-  // --
-  status    Status   @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@map("subeler")
-}
-
-model Depo {
-  id                      Int     @id @default(autoincrement())
-  code                    String
+model Warehouse {
+  id                      Int             @id @default(autoincrement())
+  code                    String          @unique @db.Char(6)
   name                    String
   responsible_person_name String?
   phone                   String?
   address                 String?
   description             String?
-
   // --
-  status    Status   @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status                  Status          @default(ACTIVE)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  // --
+  company_id              Int
+  company                 Company         @relation(fields: [company_id], references: [id])
+  // --
+  stock_categories        StockCategory[]
+  stocks                  Stock[]
+  stock_carts             StockCart[]
 
-  @@map("depolar")
+  @@map("warehouses")
 }
 
-model Tedarikci {
-  id            Int        @id @default(autoincrement())
-  code          String
-  name          String
-  phone         String?
-  description   String?
+model Supplier {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique @db.Char(6)
+  name        String
+  phone       String?
+  description String?
+
+  // --
+  status      Status      @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   //
-  stok_kartlari StokKart[]
-  // --
-  status        Status     @default(ACTIVE)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  stock_carts StockCart[]
+  //
+  company_id  Int?
+  company     Company?    @relation(fields: [company_id], references: [id])
 
-  @@map("tedarikciler")
+  @@map("suppliers")
 }
 
-model Stok {
-  id                  Int            @id @default(autoincrement())
-  quantity            Int
-  date                DateTime
-  description         String?
+model Stock {
+  id                Int               @id @default(autoincrement())
+  quantity          Float             @default(0)
+  date              DateTime          @default(now())
+  description       String?
+  stock_input_type  StockInputTypes?
+  stock_output_type StockOutputTypes?
   // --
-  stok_kart_id        Int
-  stok_kart           StokKart       @relation(fields: [stok_kart_id], references: [id])
-  stok_input_type_id  Int
-  stok_input_type     StokInputType  @relation(fields: [stok_input_type_id], references: [id])
-  stok_output_type_id Int
-  stok_output_type    StokOutputType @relation(fields: [stok_output_type_id], references: [id])
+  warehouse_id      Int
+  warehouse         Warehouse         @relation(fields: [warehouse_id], references: [id])
+  stock_cart_id     Int
+  stock_cart        StockCart         @relation(fields: [stock_cart_id], references: [id])
 
   // --
   status    Status   @default(ACTIVE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("stoklar")
+  @@map("stocks")
 }
 
-model StokKart {
-  id            Int       @id @default(autoincrement())
-  code          String
-  name          String
-  barcode       String
-  kdv           Int?
-  buy_price     Int?
-  sell_price    Int?
-  description   String?
+model StockCart {
+  id             Int           @id @default(autoincrement())
+  code           String        @unique @db.Char(6)
+  name           String
+  barcode        String
+  kdv            Int?
+  supply_price   Float?
+  sell_price     Float?
+  description    String?
+  unit_type      UnitTypes
   // --
-  stoklar       Stok[]
+  stocks         Stock[]
   // --
-  tedarikci_id  Int
-  tedarikci     Tedarikci @relation(fields: [tedarikci_id], references: [id])
-  stok_marka_id Int
-  stok_marka    StokMarka @relation(fields: [stok_marka_id], references: [id])
-  stok_grup_id  Int
-  stok_grup     StokGrup  @relation(fields: [stok_grup_id], references: [id])
-  stok_cins_id  Int
-  stok_cins     StokCins  @relation(fields: [stok_cins_id], references: [id])
-  birim_id      Int
-  birim         Birim     @relation(fields: [birim_id], references: [id])
+  warehouse_id   Int
+  warehouse      Warehouse     @relation(fields: [warehouse_id], references: [id])
+  supplier_id    Int
+  supplier       Supplier      @relation(fields: [supplier_id], references: [id])
+  stock_brand_id Int
+  stock_brand    StockCategory @relation("StockCategory_Brand", fields: [stock_brand_id], references: [id])
+  stock_group_id Int
+  stock_group    StockCategory @relation("StockCategory_Group", fields: [stock_group_id], references: [id])
+  stock_model_id Int
+  stock_model    StockCategory @relation("StockCategory_Model", fields: [stock_model_id], references: [id])
 
   // --
   status    Status   @default(ACTIVE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("stok_kartlari")
+  @@map("stock_carts")
 }
 
-model StokMarka {
-  id            Int        @id @default(autoincrement())
-  code          String
-  name          String
+model StockCategory {
+  id                  Int                @id @default(autoincrement())
+  code                String             @unique @db.Char(6)
+  name                String
+  stock_category_type StockCategoryTypes
   //--
-  stok_kartlari StokKart[]
+  stock_brand_carts   StockCart[]        @relation("StockCategory_Brand")
+  stock_model_carts   StockCart[]        @relation("StockCategory_Model")
+  stock_group_carts   StockCart[]        @relation("StockCategory_Group")
   // --
-  status        Status     @default(ACTIVE)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  @@map("stok_markalari")
-}
-
-model StokGrup {
-  id            Int        @id @default(autoincrement())
-  code          String
-  name          String
-  //--
-  stok_kartlari StokKart[]
+  status              Status             @default(ACTIVE)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   // --
-  status        Status     @default(ACTIVE)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  warehouse_id        Int
+  warehouse           Warehouse          @relation(fields: [warehouse_id], references: [id])
 
-  @@map("stop_gruplari")
-}
-
-model StokCins {
-  id            Int        @id @default(autoincrement())
-  code          String
-  name          String
-  //--
-  stok_kartlari StokKart[]
-  // --
-  status        Status     @default(ACTIVE)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  @@map("stok_cinsleri")
-}
-
-model Birim {
-  id            Int        @id @default(autoincrement())
-  symbol        String
-  name          String
-  //--
-  stok_kartlari StokKart[]
-  // --
-  status        Status     @default(ACTIVE)
-
-  @@map("birimler")
-}
-
-model StokInputType {
-  id      Int    @id @default(autoincrement())
-  name    String
-  // --
-  stoklar Stok[]
-  // --
-  status  Status @default(ACTIVE)
-
-  @@map("stok_input_types")
-}
-
-model StokOutputType {
-  id      Int    @id @default(autoincrement())
-  name    String
-  // --
-  stoklar Stok[]
-  // --
-  status  Status @default(ACTIVE)
-
-  @@map("stok_output_types")
+  @@map("stock_categories")
 }
 
 enum Status {
   ACTIVE
   PASSIVE
   DELETED
+}
+
+enum StockInputTypes {
+  SUPPLY
+  RETURN
+}
+
+enum StockOutputTypes {
+  SELL
+  TRASH
+}
+
+enum StockCategoryTypes {
+  BRAND
+  MODEL
+  GROUP
+}
+
+enum UnitTypes {
+  PIECE
+  KILOGRAM
+  METER
+  LITER
 }
