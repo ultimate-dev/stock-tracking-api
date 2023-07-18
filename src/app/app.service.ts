@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'db/prisma.service';
 
 @Injectable()
 export class AppService {
-  constructor() {}
+  constructor(private prisma: PrismaService) {}
 
-  getHello(): string {
+  hello(): string {
     return 'Hello World';
   }
 }

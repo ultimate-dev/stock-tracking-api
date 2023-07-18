@@ -10,7 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Company {
   id        Int         @id @default(autoincrement())
   name      String
@@ -43,7 +42,6 @@ model User {
 
   @@map("users")
 }
-
 
 model Warehouse {
   id                      Int             @id @default(autoincrement())
@@ -82,8 +80,8 @@ model Supplier {
   //
   stock_carts StockCart[]
   //
-  company_id  Int?
-  company     Company?    @relation(fields: [company_id], references: [id])
+  company_id  Int
+  company     Company     @relation(fields: [company_id], references: [id])
 
   @@map("suppliers")
 }
