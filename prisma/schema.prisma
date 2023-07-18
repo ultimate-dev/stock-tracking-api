@@ -11,17 +11,20 @@ datasource db {
 }
 
 model Company {
-  id        Int         @id @default(autoincrement())
-  name      String
-  logo      String?
+  id              Int             @id @default(autoincrement())
+  name            String
+  logo            String?
   // --
-  status    Status      @default(ACTIVE)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  status          Status          @default(ACTIVE)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   // --
-  users     User[]
-  warehouse Warehouse[]
-  suppliers Supplier[]
+  users           User[]
+  warehouse       Warehouse[]
+  suppliers       Supplier[]
+  stocks          Stock[]
+  stockCarts      StockCart[]
+  stockCategories StockCategory[]
 
   @@map("companies")
 }
@@ -94,6 +97,8 @@ model Stock {
   stock_input_type  StockInputTypes?
   stock_output_type StockOutputTypes?
   // --
+  company_id        Int
+  company           Company           @relation(fields: [company_id], references: [id])
   warehouse_id      Int
   warehouse         Warehouse         @relation(fields: [warehouse_id], references: [id])
   stock_cart_id     Int
@@ -120,6 +125,8 @@ model StockCart {
   // --
   stocks         Stock[]
   // --
+  company_id     Int
+  company        Company       @relation(fields: [company_id], references: [id])
   warehouse_id   Int
   warehouse      Warehouse     @relation(fields: [warehouse_id], references: [id])
   supplier_id    Int
@@ -153,6 +160,8 @@ model StockCategory {
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
   // --
+  company_id          Int
+  company             Company            @relation(fields: [company_id], references: [id])
   warehouse_id        Int
   warehouse           Warehouse          @relation(fields: [warehouse_id], references: [id])
 
