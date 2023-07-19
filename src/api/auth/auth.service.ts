@@ -12,4 +12,16 @@ export class AuthService {
     });
     return { user };
   }
+
+  async getWarehouses(fields?: any) {
+    const where = { ...fields };
+    const select = { id: true, code: true, name: true };
+
+    let total = await this.prisma.warehouse.count({ where });
+    let warehouses = await this.prisma.warehouse.findMany({ where, select });
+    return {
+      total,
+      warehouses,
+    };
+  }
 }

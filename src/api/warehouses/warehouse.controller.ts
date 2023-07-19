@@ -17,6 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 @UseGuards(AuthGuard('jwt'))
 export class WarehouseController {
   constructor(private readonly service: WarehouseService) {}
+  
 
   @Get()
   async getAll(@Request() req) {

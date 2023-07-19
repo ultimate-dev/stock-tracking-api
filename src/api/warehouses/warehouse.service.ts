@@ -8,8 +8,8 @@ export class WarehouseService {
   async get(fields?: any) {
     const where = { ...fields };
 
-    let total = await this.prisma.warehouse.count(where);
-    let warehouses = await this.prisma.warehouse.findMany(where);
+    let total = await this.prisma.warehouse.count({ where });
+    let warehouses = await this.prisma.warehouse.findMany({ where });
     return {
       total,
       warehouses,

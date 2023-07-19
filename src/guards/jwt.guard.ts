@@ -14,7 +14,7 @@ export class JwtGuard extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(decoded: any): Promise<any> {
-    let user = await this.authService.user({ id: decoded.id });
+    let { user } = await this.authService.user({ id: decoded.id });
     if (user) {
       return user;
     }

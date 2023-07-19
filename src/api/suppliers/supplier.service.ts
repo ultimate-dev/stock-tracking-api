@@ -8,8 +8,8 @@ export class SupplierService {
   async get(fields?: any) {
     const where = { ...fields };
 
-    let total = await this.prisma.supplier.count(where);
-    let suppliers = await this.prisma.supplier.findMany(where);
+    let total = await this.prisma.supplier.count({ where });
+    let suppliers = await this.prisma.supplier.findMany({ where });
     return {
       total,
       suppliers,
@@ -19,8 +19,8 @@ export class SupplierService {
   async create(user, payload) {
     let supplier = await this.prisma.supplier.create({
       data: {
-        status: payload.status,
         company_id: user.company_id,
+        status: payload.status,
         code: payload.code,
         name: payload.name,
         phone: payload.phone,

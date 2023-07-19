@@ -6,6 +6,7 @@ import {
   Put,
   Post,
   Body,
+  Request,
   Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -51,6 +52,29 @@ export class AuthController {
         statusCode: 200,
         status: false,
         message: 'Kullanıcı Bulunamadı!',
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Get('warehouses')
+  async getWarehouses(@Request() req) {
+    try {
+      let { total, warehouses } = await this.service.getWarehouses();
+
+      return {
+        statusCode: 200,
+        status: true,
+        message: 'Success',
+        data: {
+          total,
+          warehouses,
+        },
       };
     } catch (error) {
       console.error(error);
