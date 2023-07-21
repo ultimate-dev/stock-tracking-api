@@ -5,7 +5,7 @@ import { PrismaService } from 'db/prisma.service';
 export class AppService {
   constructor(private prisma: PrismaService) {}
 
-  hello(): string {
-    return 'Hello World';
+  hello() {
+    return { data: 'Helloworld' };
   }
 }

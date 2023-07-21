@@ -61,27 +61,4 @@ export class AuthController {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
-
-  @Get('warehouses')
-  async getWarehouses(@Request() req) {
-    try {
-      let { total, warehouses } = await this.service.getWarehouses();
-
-      return {
-        statusCode: 200,
-        status: true,
-        message: 'Success',
-        data: {
-          total,
-          warehouses,
-        },
-      };
-    } catch (error) {
-      console.error(error);
-    }
-    throw new HttpException(
-      'Internal server error',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  }
 }
