@@ -40,7 +40,6 @@ export class AuthController {
           return {
             statusCode: 200,
             status: true,
-            message: 'Success',
             data: {
               token,
             },

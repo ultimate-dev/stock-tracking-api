@@ -17,7 +17,6 @@ import { AuthGuard } from '@nestjs/passport';
 @UseGuards(AuthGuard('jwt'))
 export class WarehouseController {
   constructor(private readonly service: WarehouseService) {}
-  
 
   @Get()
   async getAll(@Request() req) {
@@ -27,7 +26,7 @@ export class WarehouseController {
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: {
           total,
           warehouses,
@@ -43,14 +42,14 @@ export class WarehouseController {
   }
 
   @Put()
-  async create(@Request() req, @Body() { payload }) {
+  async create(@Request() req, @Body() body) {
     try {
-      let { warehouse } = await this.service.create(req.user, payload);
+      let { warehouse } = await this.service.create(req.user, body);
 
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { warehouse },
       };
     } catch (error) {
@@ -66,19 +65,19 @@ export class WarehouseController {
   async update(
     @Request() req,
     @Param('warehouseId') warehouseId: number,
-    @Body() { payload },
+    @Body() body,
   ) {
     try {
       let { warehouse } = await this.service.update(
         req.user,
         warehouseId,
-        payload,
+        body,
       );
 
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { warehouse },
       };
     } catch (error) {

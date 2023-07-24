@@ -10,24 +10,27 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { CustomerService } from './customer.service';
 import { AuthGuard } from '@nestjs/passport';
-import { SupplierService } from './supplier.service';
 
-@Controller('suppliers')
+@Controller('customers')
 @UseGuards(AuthGuard('jwt'))
-export class SupplierController {
-  constructor(private readonly service: SupplierService) {}
+export class CustomerController {
+  constructor(private readonly service: CustomerService) {}
 
   @Get()
   async getAll(@Request() req) {
     try {
-      let { total, suppliers } = await this.service.get();
+      let { total, customers } = await this.service.get();
 
       return {
         statusCode: 200,
         status: true,
-
-        data: { total, suppliers },
+        
+        data: {
+          total,
+          customers,
+        },
       };
     } catch (error) {
       console.error(error);
@@ -41,13 +44,13 @@ export class SupplierController {
   @Put()
   async create(@Request() req, @Body() body) {
     try {
-      let { supplier } = await this.service.create(req.user, body);
+      let { customer } = await this.service.create(req.user, body);
 
       return {
         statusCode: 200,
         status: true,
-
-        data: { supplier },
+        
+        data: { customer },
       };
     } catch (error) {
       console.error(error);
@@ -58,20 +61,24 @@ export class SupplierController {
     );
   }
 
-  @Post(':supplierId')
+  @Post(':warehouseId')
   async update(
     @Request() req,
-    @Param('supplierId') supplierId: number,
+    @Param('warehouseId') warehouseId: number,
     @Body() body,
   ) {
     try {
-      let { supplier } = await this.service.update(req.user, supplierId, body);
+      let { customer } = await this.service.update(
+        req.user,
+        warehouseId,
+        body,
+      );
 
       return {
         statusCode: 200,
         status: true,
-
-        data: { supplier },
+        
+        data: { customer },
       };
     } catch (error) {
       console.error(error);

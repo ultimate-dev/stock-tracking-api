@@ -2,22 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'db/prisma.service';
 
 @Injectable()
-export class SupplierService {
+export class CustomerService {
   constructor(private prisma: PrismaService) {}
 
   async get(fields?: any) {
     const where = { ...fields };
 
-    let total = await this.prisma.supplier.count({ where });
-    let suppliers = await this.prisma.supplier.findMany({ where });
+    let total = await this.prisma.customer.count({ where });
+    let customers = await this.prisma.customer.findMany({ where });
     return {
       total,
-      suppliers,
+      customers,
     };
   }
 
   async create(user, data) {
-    let supplier = await this.prisma.supplier.create({
+    let customer = await this.prisma.customer.create({
       data: {
         company_id: user.company_id,
         warehouse_id: data.warehouse_id,
@@ -25,32 +25,35 @@ export class SupplierService {
         code: data.code,
         name: data.name,
         phone: data.phone,
+        address: data.address,
         description: data.description,
       },
     });
     return {
-      supplier,
+      customer,
     };
   }
 
-  async update(user, supplierId, data) {
-    let where = { id: supplierId, company_id: user.company_id };
-    await this.prisma.supplier.updateMany({
+  async update(user, warehouseId, data) {
+    let where = { id: warehouseId, company_id: user.company_id };
+    await this.prisma.customer.updateMany({
       where,
       data: {
+        company_id: user.company_id,
         warehouse_id: data.warehouse_id,
         status: data.status,
         code: data.code,
         name: data.name,
         phone: data.phone,
+        address: data.address,
         description: data.description,
       },
     });
-    let supplier = await this.prisma.supplier.findFirst({
+    let customer = await this.prisma.customer.findFirst({
       where,
     });
     return {
-      supplier,
+      customer,
     };
   }
 }

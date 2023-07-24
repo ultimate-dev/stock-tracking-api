@@ -5,6 +5,7 @@ import { PrismaService } from 'db/prisma.service';
 export class StockService {
   constructor(private prisma: PrismaService) {}
 
+  // Stock
   async get(fields?: any) {
     const where = { ...fields };
 
@@ -28,24 +29,24 @@ export class StockService {
     };
   }
 
-  async createCart(user, payload) {
+  async createCart(user, data) {
     let stockCart = await this.prisma.stockCart.create({
       data: {
         company_id: user.company_id,
-        warehouse_id: payload.warehouse_id,
-        supplier_id: payload.supplier_id,
-        stock_brand_id: payload.stock_brand_id,
-        stock_group_id: payload.stock_group_id,
-        stock_model_id: payload.stock_model_id,
-        status: payload.status,
-        code: payload.code,
-        name: payload.name,
-        barcode: payload.barcode,
-        kdv: payload.kdv,
-        supply_price: payload.supply_price,
-        sell_price: payload.sell_price,
-        description: payload.description,
-        unit_type: payload.unit_type,
+        warehouse_id: data.warehouse_id,
+        supplier_id: data.supplier_id,
+        stock_brand_id: data.stock_brand_id,
+        stock_group_id: data.stock_group_id,
+        stock_model_id: data.stock_model_id,
+        status: data.status,
+        code: data.code,
+        name: data.name,
+        barcode: data.barcode,
+        kdv: data.kdv,
+        supply_price: data.supply_price,
+        sell_price: data.sell_price,
+        description: data.description,
+        unit_type: data.unit_type,
       },
     });
     return {
@@ -53,24 +54,24 @@ export class StockService {
     };
   }
 
-  async updateCart(user, stockCartId, payload) {
+  async updateCart(user, stockCartId, data) {
     let where = { id: stockCartId, company_id: user.company_id };
     await this.prisma.stockCart.updateMany({
       where,
       data: {
-        supplier_id: payload.supplier_id,
-        stock_brand_id: payload.stock_brand_id,
-        stock_group_id: payload.stock_group_id,
-        stock_model_id: payload.stock_model_id,
-        status: payload.status,
-        code: payload.code,
-        name: payload.name,
-        barcode: payload.barcode,
-        kdv: payload.kdv,
-        supply_price: payload.supply_price,
-        sell_price: payload.sell_price,
-        description: payload.description,
-        unit_type: payload.unit_type,
+        supplier_id: data.supplier_id,
+        stock_brand_id: data.stock_brand_id,
+        stock_group_id: data.stock_group_id,
+        stock_model_id: data.stock_model_id,
+        status: data.status,
+        code: data.code,
+        name: data.name,
+        barcode: data.barcode,
+        kdv: data.kdv,
+        supply_price: data.supply_price,
+        sell_price: data.sell_price,
+        description: data.description,
+        unit_type: data.unit_type,
       },
     });
     let stockCart = await this.prisma.stockCart.findFirst({
@@ -93,15 +94,15 @@ export class StockService {
     };
   }
 
-  async createCategory(user, payload) {
+  async createCategory(user, data) {
     let stockCategory = await this.prisma.stockCategory.create({
       data: {
         company_id: user.company_id,
-        warehouse_id: payload.warehouse_id,
-        status: payload.status,
-        code: payload.code,
-        name: payload.name,
-        stock_category_type: payload.stock_category_type,
+        warehouse_id: data.warehouse_id,
+        status: data.status,
+        code: data.code,
+        name: data.name,
+        stock_category_type: data.stock_category_type,
       },
     });
     return {
@@ -109,14 +110,14 @@ export class StockService {
     };
   }
 
-  async updateCategory(user, stockCartId, payload) {
+  async updateCategory(user, stockCartId, data) {
     let where = { id: stockCartId, company_id: user.company_id };
     await this.prisma.stockCategory.updateMany({
       where,
       data: {
-        status: payload.status,
-        code: payload.code,
-        name: payload.name,
+        status: data.status,
+        code: data.code,
+        name: data.name,
       },
     });
     let stockCategory = await this.prisma.stockCategory.findFirst({

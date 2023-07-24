@@ -10,6 +10,7 @@ import { WarehouseModule } from 'api/warehouses/warehouse.module';
 import { StockModule } from 'api/stocks/stock.module';
 import { AccountModule } from 'api/account/account.module';
 import { AuthModule } from 'api/auth/auth.module';
+import { CustomerModule } from 'api/customers/customer.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from 'api/auth/auth.module';
     SupplierModule,
     WarehouseModule,
     StockModule,
+    CustomerModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

@@ -10,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// MODELS
 model Company {
   id              Int             @id @default(autoincrement())
   name            String
@@ -25,6 +26,8 @@ model Company {
   stocks          Stock[]
   stockCarts      StockCart[]
   stockCategories StockCategory[]
+  customers       Customer[]
+  currencies      Currency[]
 
   @@map("companies")
 }
@@ -54,6 +57,7 @@ model Warehouse {
   phone                   String?
   address                 String?
   description             String?
+  main                    Boolean         @default(false)
   // --
   status                  Status          @default(ACTIVE)
   createdAt               DateTime        @default(now())
@@ -65,51 +69,11 @@ model Warehouse {
   stock_categories        StockCategory[]
   stocks                  Stock[]
   stock_carts             StockCart[]
+  customers               Customer[]
+  currencies              Currency[]
+  suppliers               Supplier[]
 
   @@map("warehouses")
-}
-
-model Supplier {
-  id          Int     @id @default(autoincrement())
-  code        String  @unique @db.Char(6)
-  name        String
-  phone       String?
-  description String?
-
-  // --
-  status      Status      @default(ACTIVE)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  //
-  stock_carts StockCart[]
-  //
-  company_id  Int
-  company     Company     @relation(fields: [company_id], references: [id])
-
-  @@map("suppliers")
-}
-
-model Stock {
-  id                Int               @id @default(autoincrement())
-  quantity          Float             @default(0)
-  date              DateTime          @default(now())
-  description       String?
-  stock_input_type  StockInputTypes?
-  stock_output_type StockOutputTypes?
-  // --
-  company_id        Int
-  company           Company           @relation(fields: [company_id], references: [id])
-  warehouse_id      Int
-  warehouse         Warehouse         @relation(fields: [warehouse_id], references: [id])
-  stock_cart_id     Int
-  stock_cart        StockCart         @relation(fields: [stock_cart_id], references: [id])
-
-  // --
-  status    Status   @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("stocks")
 }
 
 model StockCart {
@@ -137,11 +101,10 @@ model StockCart {
   stock_group    StockCategory @relation("StockCategory_Group", fields: [stock_group_id], references: [id])
   stock_model_id Int
   stock_model    StockCategory @relation("StockCategory_Model", fields: [stock_model_id], references: [id])
-
   // --
-  status    Status   @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status         Status        @default(ACTIVE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@map("stock_carts")
 }
@@ -168,18 +131,102 @@ model StockCategory {
   @@map("stock_categories")
 }
 
+model Supplier {
+  id           Int         @id @default(autoincrement())
+  code         String      @unique @db.Char(6)
+  name         String
+  phone        String?
+  address      String?
+  description  String?
+  // --
+  status       Status      @default(ACTIVE)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  //
+  stock_carts  StockCart[]
+  //
+  company_id   Int
+  company      Company     @relation(fields: [company_id], references: [id])
+  warehouse_id Int
+  warehouse    Warehouse   @relation(fields: [warehouse_id], references: [id])
+
+  @@map("suppliers")
+}
+
+model Stock {
+  id            Int         @id @default(autoincrement())
+  quantity      Float       @default(0)
+  date          DateTime    @default(now())
+  description   String?
+  stock_type    StockTypes?
+  // --
+  company_id    Int
+  company       Company     @relation(fields: [company_id], references: [id])
+  warehouse_id  Int
+  warehouse     Warehouse   @relation(fields: [warehouse_id], references: [id])
+  stock_cart_id Int
+  stock_cart    StockCart   @relation(fields: [stock_cart_id], references: [id])
+  customer_id   Int?
+  customer      Customer?   @relation(fields: [customer_id], references: [id])
+  // --
+  status        Status      @default(ACTIVE)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("stocks")
+}
+
+model Customer {
+  id           Int       @id @default(autoincrement())
+  code         String    @unique @db.Char(6)
+  name         String
+  phone        String?
+  address      String?
+  description  String?
+  // --
+  status       Status    @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  // --
+  company_id   Int
+  company      Company   @relation(fields: [company_id], references: [id])
+  warehouse_id Int
+  warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+  // --
+  stocks       Stock[]
+
+  @@map("customers")
+}
+
+model Currency {
+  id           Int       @id @default(autoincrement())
+  symbol       String
+  name         String
+  value        Float
+  main         Boolean   @default(false)
+  // --
+  status       Status    @default(ACTIVE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  //--
+  company_id   Int
+  company      Company   @relation(fields: [company_id], references: [id])
+  warehouse_id Int
+  warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+
+  @@map("currencies")
+}
+
+// ENUMS
 enum Status {
   ACTIVE
   PASSIVE
   DELETED
 }
 
-enum StockInputTypes {
+enum StockTypes {
   SUPPLY
   RETURN
-}
-
-enum StockOutputTypes {
   SELL
   TRASH
 }

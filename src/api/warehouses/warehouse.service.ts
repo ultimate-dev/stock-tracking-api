@@ -16,17 +16,18 @@ export class WarehouseService {
     };
   }
 
-  async create(user, payload) {
+  async create(user, data) {
     let warehouse = await this.prisma.warehouse.create({
       data: {
-        status: payload.status,
+        status: data.status,
         company_id: user.company_id,
-        code: payload.code,
-        name: payload.name,
-        responsible_person_name: payload.responsible_person_name,
-        phone: payload.phone,
-        address: payload.address,
-        description: payload.description,
+        code: data.code,
+        name: data.name,
+        responsible_person_name: data.responsible_person_name,
+        phone: data.phone,
+        address: data.address,
+        description: data.description,
+        main: data.main,
       },
     });
     return {
@@ -34,18 +35,19 @@ export class WarehouseService {
     };
   }
 
-  async update(user, warehouseId, payload) {
+  async update(user, warehouseId, data) {
     let where = { id: warehouseId, company_id: user.company_id };
     await this.prisma.warehouse.updateMany({
       where,
       data: {
-        status: payload.status,
-        code: payload.code,
-        name: payload.name,
-        responsible_person_name: payload.responsible_person_name,
-        phone: payload.phone,
-        address: payload.address,
-        description: payload.description,
+        status: data.status,
+        code: data.code,
+        name: data.name,
+        responsible_person_name: data.responsible_person_name,
+        phone: data.phone,
+        address: data.address,
+        description: data.description,
+        main: data.main,
       },
     });
     let warehouse = await this.prisma.warehouse.findFirst({

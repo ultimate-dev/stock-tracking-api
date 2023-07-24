@@ -26,7 +26,7 @@ export class StockController {
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { total, stocks },
       };
     } catch (error) {
@@ -47,7 +47,7 @@ export class StockController {
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { total, stockCarts },
       };
     } catch (error) {
@@ -60,14 +60,14 @@ export class StockController {
   }
 
   @Put('carts')
-  async createCart(@Request() req, @Body() { payload }) {
+  async createCart(@Request() req, @Body() body) {
     try {
-      let { stockCart } = await this.service.createCart(req.user, payload);
+      let { stockCart } = await this.service.createCart(req.user, body);
 
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { stockCart },
       };
     } catch (error) {
@@ -83,19 +83,19 @@ export class StockController {
   async updateCart(
     @Request() req,
     @Param('stockCartId') stockCartId: number,
-    @Body() { payload },
+    @Body() body,
   ) {
     try {
       let { stockCart } = await this.service.updateCart(
         req.user,
         stockCartId,
-        payload,
+        body,
       );
 
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { stockCart },
       };
     } catch (error) {
@@ -116,7 +116,7 @@ export class StockController {
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { total, stockCategories },
       };
     } catch (error) {
@@ -129,18 +129,14 @@ export class StockController {
   }
 
   @Put('categories')
-  async createCategory(@Request() req, @Body() { payload }) {
+  async createCategory(@Request() req, @Body() body) {
     try {
-      console.log(req.user, payload);
-      let { stockCategory } = await this.service.createCategory(
-        req.user,
-        payload,
-      );
+      let { stockCategory } = await this.service.createCategory(req.user, body);
 
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { stockCategory },
       };
     } catch (error) {
@@ -156,19 +152,19 @@ export class StockController {
   async updateCategory(
     @Request() req,
     @Param('stockCategoryId') stockCategoryId: number,
-    @Body() { payload },
+    @Body() body,
   ) {
     try {
       let { stockCategory } = await this.service.updateCategory(
         req.user,
         stockCategoryId,
-        payload,
+        body,
       );
 
       return {
         statusCode: 200,
         status: true,
-        message: 'Success',
+
         data: { stockCategory },
       };
     } catch (error) {
