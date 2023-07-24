@@ -9,6 +9,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Headers,
 } from '@nestjs/common';
 import { CurrencyService } from './currency.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -19,9 +20,11 @@ export class CurrencyController {
   constructor(private readonly service: CurrencyService) {}
 
   @Get()
-  async getAll(@Request() req) {
+  async getAll(@Request() req, @Headers('warehouse_id') warehouse_id) {
     try {
-      let { total, currencies } = await this.service.get();
+      let { total, currencies } = await this.service.get({
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
@@ -42,7 +45,11 @@ export class CurrencyController {
   }
 
   @Put()
-  async create(@Request() req, @Body() body) {
+  async create(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
     try {
       let { currency } = await this.service.create(req.user, body);
 
@@ -62,7 +69,12 @@ export class CurrencyController {
   }
 
   @Post(':id')
-  async update(@Request() req, @Param('id') id: number, @Body() body) {
+  async update(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
     try {
       let { currency } = await this.service.update(req.user, id, body);
 

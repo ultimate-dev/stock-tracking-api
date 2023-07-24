@@ -5,8 +5,8 @@ import { PrismaService } from 'db/prisma.service';
 export class SupplierService {
   constructor(private prisma: PrismaService) {}
 
-  async get(fields?: any) {
-    const where = { ...fields };
+  async get(filters: any) {
+    const where = { ...filters };
 
     let total = await this.prisma.supplier.count({ where });
     let suppliers = await this.prisma.supplier.findMany({ where });

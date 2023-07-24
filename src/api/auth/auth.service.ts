@@ -5,8 +5,8 @@ import { PrismaService } from 'db/prisma.service';
 export class AuthService {
   constructor(private prisma: PrismaService) {}
 
-  async user(fields: any) {
-    let where: any = { ...fields };
+  async user(filters: any) {
+    let where: any = { ...filters };
     let user = await this.prisma.user.findFirst({
       where,
     });

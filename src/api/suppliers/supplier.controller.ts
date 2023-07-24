@@ -9,9 +9,11 @@ import {
   Param,
   UseGuards,
   Request,
+  Headers,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SupplierService } from './supplier.service';
+import { Transform } from 'class-transformer';
 
 @Controller('suppliers')
 @UseGuards(AuthGuard('jwt'))
@@ -19,9 +21,11 @@ export class SupplierController {
   constructor(private readonly service: SupplierService) {}
 
   @Get()
-  async getAll(@Request() req) {
+  async getAll(@Request() req, @Headers('warehouse_id') warehouse_id) {
     try {
-      let { total, suppliers } = await this.service.get();
+      let { total, suppliers } = await this.service.get({
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
@@ -39,7 +43,11 @@ export class SupplierController {
   }
 
   @Put()
-  async create(@Request() req, @Body() body) {
+  async create(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
     try {
       let { supplier } = await this.service.create(req.user, body);
 
@@ -59,7 +67,12 @@ export class SupplierController {
   }
 
   @Post(':id')
-  async update(@Request() req, @Param('id') id: number, @Body() body) {
+  async update(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
     try {
       let { supplier } = await this.service.update(req.user, id, body);
 

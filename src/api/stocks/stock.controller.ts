@@ -9,6 +9,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Headers,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -18,31 +19,13 @@ import { AuthGuard } from '@nestjs/passport';
 export class StockController {
   constructor(private readonly service: StockService) {}
 
-  @Get()
-  async getAll(@Request() req) {
-    try {
-      let { total, stocks } = await this.service.get();
-
-      return {
-        statusCode: 200,
-        status: true,
-
-        data: { total, stocks },
-      };
-    } catch (error) {
-      console.error(error);
-    }
-    throw new HttpException(
-      'Internal server error',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-  }
-
   // Carts
   @Get('carts')
-  async getCarts(@Request() req) {
+  async getCarts(@Request() req, @Headers('warehouse_id') warehouse_id) {
     try {
-      let { total, stockCarts } = await this.service.getCarts();
+      let { total, stockCarts } = await this.service.getCarts({
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
@@ -60,7 +43,11 @@ export class StockController {
   }
 
   @Put('carts')
-  async createCart(@Request() req, @Body() body) {
+  async createCart(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
     try {
       let { stockCart } = await this.service.createCart(req.user, body);
 
@@ -84,6 +71,7 @@ export class StockController {
     @Request() req,
     @Param('stockCartId') stockCartId: number,
     @Body() body,
+    @Headers('warehouse_id') warehouse_id,
   ) {
     try {
       let { stockCart } = await this.service.updateCart(
@@ -109,9 +97,11 @@ export class StockController {
 
   // Categories
   @Get('categories')
-  async getCategories(@Request() req) {
+  async getCategories(@Request() req, @Headers('warehouse_id') warehouse_id) {
     try {
-      let { total, stockCategories } = await this.service.getCategories();
+      let { total, stockCategories } = await this.service.getCategories({
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
@@ -129,7 +119,11 @@ export class StockController {
   }
 
   @Put('categories')
-  async createCategory(@Request() req, @Body() body) {
+  async createCategory(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
     try {
       let { stockCategory } = await this.service.createCategory(req.user, body);
 
@@ -153,6 +147,7 @@ export class StockController {
     @Request() req,
     @Param('stockCategoryId') stockCategoryId: number,
     @Body() body,
+    @Headers('warehouse_id') warehouse_id,
   ) {
     try {
       let { stockCategory } = await this.service.updateCategory(

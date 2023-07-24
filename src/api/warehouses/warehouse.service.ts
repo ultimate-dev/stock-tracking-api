@@ -5,8 +5,8 @@ import { PrismaService } from 'db/prisma.service';
 export class WarehouseService {
   constructor(private prisma: PrismaService) {}
 
-  async get(fields?: any) {
-    const where = { ...fields };
+  async get() {
+    const where = {};
 
     let total = await this.prisma.warehouse.count({ where });
     let warehouses = await this.prisma.warehouse.findMany({ where });

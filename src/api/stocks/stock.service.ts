@@ -6,20 +6,10 @@ export class StockService {
   constructor(private prisma: PrismaService) {}
 
   // Stock
-  async get(fields?: any) {
-    const where = { ...fields };
-
-    let total = await this.prisma.stock.count({ where });
-    let stocks = await this.prisma.stock.findMany({ where });
-    return {
-      total,
-      stocks,
-    };
-  }
 
   // Carts
-  async getCarts(fields?: any) {
-    const where = { ...fields };
+  async getCarts(filters: any) {
+    const where = { ...filters };
 
     let total = await this.prisma.stockCart.count({ where });
     let stockCarts = await this.prisma.stockCart.findMany({ where });
@@ -83,8 +73,8 @@ export class StockService {
   }
 
   // Categories
-  async getCategories(fields?: any) {
-    const where = { ...fields };
+  async getCategories(filters: any) {
+    const where = { ...filters };
 
     let total = await this.prisma.stockCategory.count({ where });
     let stockCategories = await this.prisma.stockCategory.findMany({ where });
