@@ -2,54 +2,52 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'db/prisma.service';
 
 @Injectable()
-export class SupplierService {
+export class CurrencyService {
   constructor(private prisma: PrismaService) {}
 
   async get(fields?: any) {
     const where = { ...fields };
 
-    let total = await this.prisma.supplier.count({ where });
-    let suppliers = await this.prisma.supplier.findMany({ where });
+    let total = await this.prisma.currency.count({ where });
+    let currencies = await this.prisma.currency.findMany({ where });
     return {
       total,
-      suppliers,
+      currencies,
     };
   }
 
   async create(user, data) {
-    let supplier = await this.prisma.supplier.create({
+    let currency = await this.prisma.currency.create({
       data: {
         company_id: user.company_id,
         warehouse_id: data.warehouse_id,
         status: data.status,
-        code: data.code,
+        symbol: data.symbol,
         name: data.name,
-        phone: data.phone,
-        description: data.description,
+        value: data.value,
       },
     });
     return {
-      supplier,
+      currency,
     };
   }
 
   async update(user, id, data) {
     let where = { id, company_id: user.company_id };
-    await this.prisma.supplier.updateMany({
+    await this.prisma.currency.updateMany({
       where,
       data: {
         status: data.status,
-        code: data.code,
+        symbol: data.symbol,
         name: data.name,
-        phone: data.phone,
-        description: data.description,
+        value: data.value,
       },
     });
-    let supplier = await this.prisma.supplier.findFirst({
+    let currency = await this.prisma.currency.findFirst({
       where,
     });
     return {
-      supplier,
+      currency,
     };
   }
 }

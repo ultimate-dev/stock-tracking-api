@@ -81,9 +81,9 @@ model StockCart {
   code           String        @unique @db.Char(6)
   name           String
   barcode        String
-  kdv            Int?
-  supply_price   Float?
-  sell_price     Float?
+  kdv            Float
+  supply_price   Float
+  sell_price     Float
   description    String?
   unit_type      UnitTypes
   // --
@@ -156,6 +156,7 @@ model Supplier {
 model Stock {
   id            Int         @id @default(autoincrement())
   quantity      Float       @default(0)
+  price         Float?
   date          DateTime    @default(now())
   description   String?
   stock_type    StockTypes?
@@ -202,7 +203,7 @@ model Currency {
   id           Int       @id @default(autoincrement())
   symbol       String
   name         String
-  value        Float
+  value        Float     @default(1)
   main         Boolean   @default(false)
   // --
   status       Status    @default(ACTIVE)

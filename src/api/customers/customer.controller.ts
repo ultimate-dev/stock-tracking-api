@@ -26,7 +26,7 @@ export class CustomerController {
       return {
         statusCode: 200,
         status: true,
-        
+
         data: {
           total,
           customers,
@@ -49,7 +49,7 @@ export class CustomerController {
       return {
         statusCode: 200,
         status: true,
-        
+
         data: { customer },
       };
     } catch (error) {
@@ -61,23 +61,15 @@ export class CustomerController {
     );
   }
 
-  @Post(':warehouseId')
-  async update(
-    @Request() req,
-    @Param('warehouseId') warehouseId: number,
-    @Body() body,
-  ) {
+  @Post(':id')
+  async update(@Request() req, @Param('id') id: number, @Body() body) {
     try {
-      let { customer } = await this.service.update(
-        req.user,
-        warehouseId,
-        body,
-      );
+      let { customer } = await this.service.update(req.user, id, body);
 
       return {
         statusCode: 200,
         status: true,
-        
+
         data: { customer },
       };
     } catch (error) {

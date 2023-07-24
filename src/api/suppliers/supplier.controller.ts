@@ -58,14 +58,10 @@ export class SupplierController {
     );
   }
 
-  @Post(':supplierId')
-  async update(
-    @Request() req,
-    @Param('supplierId') supplierId: number,
-    @Body() body,
-  ) {
+  @Post(':id')
+  async update(@Request() req, @Param('id') id: number, @Body() body) {
     try {
-      let { supplier } = await this.service.update(req.user, supplierId, body);
+      let { supplier } = await this.service.update(req.user, id, body);
 
       return {
         statusCode: 200,

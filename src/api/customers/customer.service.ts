@@ -34,13 +34,11 @@ export class CustomerService {
     };
   }
 
-  async update(user, warehouseId, data) {
-    let where = { id: warehouseId, company_id: user.company_id };
+  async update(user, id, data) {
+    let where = { id, company_id: user.company_id };
     await this.prisma.customer.updateMany({
       where,
       data: {
-        company_id: user.company_id,
-        warehouse_id: data.warehouse_id,
         status: data.status,
         code: data.code,
         name: data.name,

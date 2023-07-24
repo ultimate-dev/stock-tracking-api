@@ -11,6 +11,8 @@ import { StockModule } from 'api/stocks/stock.module';
 import { AccountModule } from 'api/account/account.module';
 import { AuthModule } from 'api/auth/auth.module';
 import { CustomerModule } from 'api/customers/customer.module';
+import { CurrencyModule } from 'api/currencies/currency.module';
+import { AdminModule } from 'api/admin/admin.module';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { CustomerModule } from 'api/customers/customer.module';
     SupplierModule,
     WarehouseModule,
     StockModule,
-    CustomerModule
+    CustomerModule,
+    CurrencyModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

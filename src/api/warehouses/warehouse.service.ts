@@ -35,8 +35,8 @@ export class WarehouseService {
     };
   }
 
-  async update(user, warehouseId, data) {
-    let where = { id: warehouseId, company_id: user.company_id };
+  async update(user, id, data) {
+    let where = { id, company_id: user.company_id };
     await this.prisma.warehouse.updateMany({
       where,
       data: {

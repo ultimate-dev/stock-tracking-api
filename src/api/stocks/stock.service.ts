@@ -54,8 +54,8 @@ export class StockService {
     };
   }
 
-  async updateCart(user, stockCartId, data) {
-    let where = { id: stockCartId, company_id: user.company_id };
+  async updateCart(user, id, data) {
+    let where = { id, company_id: user.company_id };
     await this.prisma.stockCart.updateMany({
       where,
       data: {
@@ -110,8 +110,8 @@ export class StockService {
     };
   }
 
-  async updateCategory(user, stockCartId, data) {
-    let where = { id: stockCartId, company_id: user.company_id };
+  async updateCategory(user, id, data) {
+    let where = { id, company_id: user.company_id };
     await this.prisma.stockCategory.updateMany({
       where,
       data: {
