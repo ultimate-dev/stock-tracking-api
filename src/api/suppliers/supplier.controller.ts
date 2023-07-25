@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
   Headers,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SupplierService } from './supplier.service';
@@ -21,11 +22,23 @@ export class SupplierController {
   constructor(private readonly service: SupplierService) {}
 
   @Get()
-  async getAll(@Request() req, @Headers('warehouse_id') warehouse_id) {
+  async getAll(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    { search = '', sorter_name = 'id', sorter_dir = 'asc' },
+  ) {
     try {
-      let { total, suppliers } = await this.service.get({
-        warehouse_id: parseInt(warehouse_id),
-      });
+      let { total, suppliers } = await this.service.get(
+        {
+          warehouse_id: parseInt(warehouse_id),
+        },
+        search,
+        {
+          sorter_name,
+          sorter_dir,
+        },
+      );
 
       return {
         statusCode: 200,

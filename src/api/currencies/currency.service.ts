@@ -5,11 +5,16 @@ import { PrismaService } from 'db/prisma.service';
 export class CurrencyService {
   constructor(private prisma: PrismaService) {}
 
-  async get(filters: any) {
-    const where = { ...filters };
+  async get(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [{ symbol: { contains: search } }, { name: { contains: search } }],
+    };
+    const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
     let total = await this.prisma.currency.count({ where });
-    let currencies = await this.prisma.currency.findMany({ where });
+    let currencies = await this.prisma.currency.findMany({ where, orderBy });
+    console.log(currencies)
     return {
       total,
       currencies,

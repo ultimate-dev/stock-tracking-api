@@ -5,11 +5,15 @@ import { PrismaService } from 'db/prisma.service';
 export class SupplierService {
   constructor(private prisma: PrismaService) {}
 
-  async get(filters: any) {
-    const where = { ...filters };
+  async get(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [{ code: { contains: search } }, { name: { contains: search } }],
+    };
+    const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
     let total = await this.prisma.supplier.count({ where });
-    let suppliers = await this.prisma.supplier.findMany({ where });
+    let suppliers = await this.prisma.supplier.findMany({ where, orderBy });
     return {
       total,
       suppliers,

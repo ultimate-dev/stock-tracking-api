@@ -5,11 +5,17 @@ import { PrismaService } from 'db/prisma.service';
 export class WarehouseService {
   constructor(private prisma: PrismaService) {}
 
-  async get() {
-    const where = {};
+  async get(search, sorter) {
+    const where: any = {
+      OR: [{ code: { contains: search } }, { name: { contains: search } }],
+    };
+    const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
     let total = await this.prisma.warehouse.count({ where });
-    let warehouses = await this.prisma.warehouse.findMany({ where });
+    let warehouses = await this.prisma.warehouse.findMany({
+      where,
+      orderBy,
+    });
     return {
       total,
       warehouses,
@@ -19,8 +25,8 @@ export class WarehouseService {
   async create(user, data) {
     let warehouse = await this.prisma.warehouse.create({
       data: {
-        status: data.status,
         company_id: user.company_id,
+        status: data.status,
         code: data.code,
         name: data.name,
         responsible_person_name: data.responsible_person_name,

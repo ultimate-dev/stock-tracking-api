@@ -9,6 +9,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -19,9 +20,16 @@ export class WarehouseController {
   constructor(private readonly service: WarehouseService) {}
 
   @Get()
-  async getAll(@Request() req) {
+  async getAll(
+    @Request() req,
+    @Query()
+    { search = '', sorter_name = 'id', sorter_dir = 'asc' },
+  ) {
     try {
-      let { total, warehouses } = await this.service.get();
+      let { total, warehouses } = await this.service.get(search, {
+        sorter_name,
+        sorter_dir,
+      });
 
       return {
         statusCode: 200,
