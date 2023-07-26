@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
   Headers,
+  Query,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,11 +21,23 @@ export class CustomerController {
   constructor(private readonly service: CustomerService) {}
 
   @Get()
-  async getAll(@Request() req, @Headers('warehouse_id') warehouse_id) {
+  async getAll(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    { search = '', sorter_name = 'id', sorter_dir = 'asc' },
+  ) {
     try {
-      let { total, customers } = await this.service.get({
-        warehouse_id: parseInt(warehouse_id),
-      });
+      let { total, customers } = await this.service.get(
+        {
+          warehouse_id: parseInt(warehouse_id),
+        },
+        search,
+        {
+          sorter_name,
+          sorter_dir,
+        },
+      );
 
       return {
         statusCode: 200,

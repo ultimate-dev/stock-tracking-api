@@ -66,7 +66,7 @@ export class StockController {
     );
   }
 
-  @Post('carts/:stockCartId')
+  @Post('carts/:id')
   async updateCart(
     @Request() req,
     @Param('stockCartId') stockCartId: number,
@@ -142,17 +142,17 @@ export class StockController {
     );
   }
 
-  @Post('categories/:stockCategoryId')
+  @Post('categories/:id')
   async updateCategory(
     @Request() req,
-    @Param('stockCategoryId') stockCategoryId: number,
+    @Param('id') id: number,
     @Body() body,
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
       let { stockCategory } = await this.service.updateCategory(
         req.user,
-        stockCategoryId,
+        id,
         body,
       );
 
