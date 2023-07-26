@@ -8,11 +8,15 @@ export class StockService {
   // Stock
 
   // Carts
-  async getCarts(filters: any) {
-    const where = { ...filters };
+  async getCarts(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [{ code: { contains: search } }, { name: { contains: search } }],
+    };
+    const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
     let total = await this.prisma.stockCart.count({ where });
-    let stockCarts = await this.prisma.stockCart.findMany({ where });
+    let stockCarts = await this.prisma.stockCart.findMany({ where, orderBy });
     return {
       total,
       stockCarts,
@@ -73,11 +77,18 @@ export class StockService {
   }
 
   // Categories
-  async getCategories(filters: any) {
-    const where = { ...filters };
+  async getCategories(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [{ code: { contains: search } }, { name: { contains: search } }],
+    };
+    const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
     let total = await this.prisma.stockCategory.count({ where });
-    let stockCategories = await this.prisma.stockCategory.findMany({ where });
+    let stockCategories = await this.prisma.stockCategory.findMany({
+      where,
+      orderBy,
+    });
     return {
       total,
       stockCategories,

@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
   Headers,
+  Query,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,11 +22,20 @@ export class StockController {
 
   // Carts
   @Get('carts')
-  async getCarts(@Request() req, @Headers('warehouse_id') warehouse_id) {
+  async getCarts(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    { search = '', sorter_name = 'id', sorter_dir = 'asc' },
+  ) {
     try {
-      let { total, stockCarts } = await this.service.getCarts({
-        warehouse_id: parseInt(warehouse_id),
-      });
+      let { total, stockCarts } = await this.service.getCarts(
+        {
+          warehouse_id: parseInt(warehouse_id),
+        },
+        search,
+        { sorter_name, sorter_dir },
+      );
 
       return {
         statusCode: 200,
@@ -69,16 +79,12 @@ export class StockController {
   @Post('carts/:id')
   async updateCart(
     @Request() req,
-    @Param('stockCartId') stockCartId: number,
+    @Param('id') id: number,
     @Body() body,
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCart } = await this.service.updateCart(
-        req.user,
-        stockCartId,
-        body,
-      );
+      let { stockCart } = await this.service.updateCart(req.user, id, body);
 
       return {
         statusCode: 200,
@@ -97,11 +103,21 @@ export class StockController {
 
   // Categories
   @Get('categories')
-  async getCategories(@Request() req, @Headers('warehouse_id') warehouse_id) {
+  async getCategories(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    { type, search = '', sorter_name = 'id', sorter_dir = 'asc' },
+  ) {
     try {
-      let { total, stockCategories } = await this.service.getCategories({
-        warehouse_id: parseInt(warehouse_id),
-      });
+      let { total, stockCategories } = await this.service.getCategories(
+        {
+          stock_category_type: type,
+          warehouse_id: parseInt(warehouse_id),
+        },
+        search,
+        { sorter_name, sorter_dir },
+      );
 
       return {
         statusCode: 200,
