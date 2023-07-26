@@ -11,7 +11,11 @@ export class StockService {
   async getCarts(filters: any, search, sorter) {
     const where: any = {
       ...filters,
-      OR: [{ code: { contains: search } }, { name: { contains: search } }],
+      OR: [
+        { code: { contains: search } },
+        { name: { contains: search } },
+        { barcode: { contains: search } },
+      ],
     };
     const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
