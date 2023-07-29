@@ -134,14 +134,17 @@ export class StockController {
     );
   }
 
-  @Put('categories')
-  async createCategory(
+  @Get('categories/:code')
+  async getCategory(
     @Request() req,
-    @Body() body,
+    @Param('code') code: string,
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCategory } = await this.service.createCategory(req.user, body);
+      let { stockCategory } = await this.service.getCategory({
+        warehouse_id: parseInt(warehouse_id),
+        code,
+      });
 
       return {
         statusCode: 200,
@@ -158,24 +161,54 @@ export class StockController {
     );
   }
 
-  @Post('categories/:id')
+  @Put('categories')
+  async createCategory(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let { stockCategory } = await this.service.createCategory(req.user, {
+        warehouse_id: parseInt(warehouse_id),
+        ...body,
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        message: 'Kayıt Oluşturuldu',
+        data: { stockCategory },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Post('categories/:code')
   async updateCategory(
     @Request() req,
-    @Param('id') id: number,
+    @Param('code') code: string,
     @Body() body,
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
       let { stockCategory } = await this.service.updateCategory(
         req.user,
-        id,
-        body,
+        code,
+        {
+          warehouse_id: parseInt(warehouse_id),
+          ...body,
+        },
       );
 
       return {
         statusCode: 200,
         status: true,
-
+        message: 'Değişiklikler Başarıyla Kaydedildi',
         data: { stockCategory },
       };
     } catch (error) {

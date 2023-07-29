@@ -99,6 +99,18 @@ export class StockService {
     };
   }
 
+  async getCategory(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let stockCategory = await this.prisma.stockCategory.findFirst({
+      where,
+    });
+    return {
+      stockCategory,
+    };
+  }
+
   async createCategory(user, data) {
     let stockCategory = await this.prisma.stockCategory.create({
       data: {
@@ -115,8 +127,8 @@ export class StockService {
     };
   }
 
-  async updateCategory(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async updateCategory(user, code, data) {
+    let where = { code, company_id: user.company_id };
     await this.prisma.stockCategory.updateMany({
       where,
       data: {
