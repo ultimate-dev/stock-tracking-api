@@ -5,7 +5,7 @@ import { PrismaService } from 'db/prisma.service';
 export class CustomerService {
   constructor(private prisma: PrismaService) {}
 
-  async get(filters: any, search, sorter) {
+  async getAll(filters: any, search, sorter) {
     const where: any = {
       ...filters,
       OR: [{ code: { contains: search } }, { name: { contains: search } }],
@@ -20,10 +20,22 @@ export class CustomerService {
     };
   }
 
-  async create(user, data) {
+  async get(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let customer = await this.prisma.customer.findFirst({
+      where,
+    });
+    return {
+      customer,
+    };
+  }
+
+  async create(data) {
     let customer = await this.prisma.customer.create({
       data: {
-        company_id: user.company_id,
+        company_id: data.company_id,
         warehouse_id: data.warehouse_id,
         status: data.status,
         code: data.code,
@@ -38,8 +50,8 @@ export class CustomerService {
     };
   }
 
-  async update(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async update(id, data) {
+    let where = { id, company_id: data.company_id };
     await this.prisma.customer.updateMany({
       where,
       data: {

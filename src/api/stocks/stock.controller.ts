@@ -31,6 +31,7 @@ export class StockController {
     try {
       let { total, stockCarts } = await this.service.getCarts(
         {
+          company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
         },
         search,
@@ -52,6 +53,33 @@ export class StockController {
     );
   }
 
+  @Get('carts/:id')
+  async getCart(
+    @Request() req,
+    @Param('id') id: number,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let { stockCart } = await this.service.getCart({
+        id,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        data: { stockCart },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
   @Put('carts')
   async createCart(
     @Request() req,
@@ -59,12 +87,16 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCart } = await this.service.createCart(req.user, body);
+      let { stockCart } = await this.service.createCart({
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
         status: true,
-
+        message: 'Kayıt Oluşturuldu',
         data: { stockCart },
       };
     } catch (error) {
@@ -84,12 +116,16 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCart } = await this.service.updateCart(req.user, id, body);
+      let { stockCart } = await this.service.updateCart(id, {
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
         status: true,
-
+        message: 'Değişiklikler Başarıyla Kaydedildi',
         data: { stockCart },
       };
     } catch (error) {
@@ -113,6 +149,7 @@ export class StockController {
       let { total, stockCategories } = await this.service.getCategories(
         {
           stock_category_type: type,
+          company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
         },
         search,
@@ -142,8 +179,9 @@ export class StockController {
   ) {
     try {
       let { stockCategory } = await this.service.getCategory({
-        warehouse_id: parseInt(warehouse_id),
         id,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
       });
 
       return {
@@ -168,9 +206,10 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCategory } = await this.service.createCategory(req.user, {
-        warehouse_id: parseInt(warehouse_id),
+      let { stockCategory } = await this.service.createCategory({
         ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
       });
 
       return {
@@ -196,14 +235,11 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCategory } = await this.service.updateCategory(
-        req.user,
-        id,
-        {
-          warehouse_id: parseInt(warehouse_id),
-          ...body,
-        },
-      );
+      let { stockCategory } = await this.service.updateCategory(id, {
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,

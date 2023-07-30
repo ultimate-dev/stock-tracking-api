@@ -5,15 +5,11 @@ import { PrismaService } from 'db/prisma.service';
 export class AccountService {
   constructor(private prisma: PrismaService) {}
 
-  async get(id: number, company_id: number) {
-    const where = { id, company_id };
-
+  async get(filters: any) {
+    const where = { ...filters };
     let user = await this.prisma.user.findFirst({
       where,
-      include: { company: true },
     });
-    return {
-      user,
-    };
+    return { user };
   }
 }

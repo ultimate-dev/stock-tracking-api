@@ -5,7 +5,7 @@ import { PrismaService } from 'db/prisma.service';
 export class SupplierService {
   constructor(private prisma: PrismaService) {}
 
-  async get(filters: any, search, sorter) {
+  async getAll(filters: any, search, sorter) {
     const where: any = {
       ...filters,
       OR: [{ code: { contains: search } }, { name: { contains: search } }],
@@ -20,15 +20,28 @@ export class SupplierService {
     };
   }
 
-  async create(user, data) {
+  async get(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let supplier = await this.prisma.supplier.findFirst({
+      where,
+    });
+    return {
+      supplier,
+    };
+  }
+
+  async create(data) {
     let supplier = await this.prisma.supplier.create({
       data: {
-        company_id: user.company_id,
+        company_id: data.company_id,
         warehouse_id: data.warehouse_id,
         status: data.status,
         code: data.code,
         name: data.name,
         phone: data.phone,
+        address: data.address,
         description: data.description,
       },
     });
@@ -37,8 +50,8 @@ export class SupplierService {
     };
   }
 
-  async update(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async update(id, data) {
+    let where = { id, company_id: data.company_id };
     await this.prisma.supplier.updateMany({
       where,
       data: {
@@ -46,6 +59,7 @@ export class SupplierService {
         code: data.code,
         name: data.name,
         phone: data.phone,
+        address: data.address,
         description: data.description,
       },
     });

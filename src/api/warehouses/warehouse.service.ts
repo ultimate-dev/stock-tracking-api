@@ -5,8 +5,9 @@ import { PrismaService } from 'db/prisma.service';
 export class WarehouseService {
   constructor(private prisma: PrismaService) {}
 
-  async get(search, sorter) {
+  async getAll(filters: any, search, sorter) {
     const where: any = {
+      ...filters,
       OR: [{ code: { contains: search } }, { name: { contains: search } }],
     };
     const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
@@ -22,10 +23,22 @@ export class WarehouseService {
     };
   }
 
-  async create(user, data) {
+  async get(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let warehouse = await this.prisma.warehouse.findFirst({
+      where,
+    });
+    return {
+      warehouse,
+    };
+  }
+
+  async create(data) {
     let warehouse = await this.prisma.warehouse.create({
       data: {
-        company_id: user.company_id,
+        company_id: data.company_id,
         status: data.status,
         code: data.code,
         name: data.name,
@@ -41,8 +54,8 @@ export class WarehouseService {
     };
   }
 
-  async update(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async update(id, data) {
+    let where = { id, company_id: data.company_id };
     await this.prisma.warehouse.updateMany({
       where,
       data: {

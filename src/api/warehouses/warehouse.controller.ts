@@ -26,15 +26,20 @@ export class WarehouseController {
     { search = '', sorter_name = 'id', sorter_dir = 'asc' },
   ) {
     try {
-      let { total, warehouses } = await this.service.get(search, {
-        sorter_name,
-        sorter_dir,
-      });
+      let { total, warehouses } = await this.service.getAll(
+        {
+          company_id: req.user.company_id,
+        },
+        search,
+        {
+          sorter_name,
+          sorter_dir,
+        },
+      );
 
       return {
         statusCode: 200,
         status: true,
-
         data: {
           total,
           warehouses,
@@ -49,15 +54,43 @@ export class WarehouseController {
     );
   }
 
-  @Put()
-  async create(@Request() req, @Body() body) {
+  @Get(':id')
+  async get(
+    @Request() req,
+    @Param('id') id: number,
+  ) {
     try {
-      let { warehouse } = await this.service.create(req.user, body);
+      let { warehouse } = await this.service.get({
+        id,
+        company_id: req.user.company_id,
+      });
 
       return {
         statusCode: 200,
         status: true,
+        data: { warehouse },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
 
+  @Put()
+  async create(@Request() req, @Body() body) {
+    try {
+      let { warehouse } = await this.service.create({
+        ...body,
+        company_id: req.user.company_id,
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        message: 'Kayıt Oluşturuldu',
         data: { warehouse },
       };
     } catch (error) {
@@ -72,12 +105,15 @@ export class WarehouseController {
   @Post(':id')
   async update(@Request() req, @Param('id') id: number, @Body() body) {
     try {
-      let { warehouse } = await this.service.update(req.user, id, body);
+      let { warehouse } = await this.service.update(id, {
+        ...body,
+        company_id: req.user.company_id,
+      });
 
       return {
         statusCode: 200,
         status: true,
-
+        message: 'Değişiklikler Başarıyla Kaydedildi',
         data: { warehouse },
       };
     } catch (error) {

@@ -5,7 +5,7 @@ import { PrismaService } from 'db/prisma.service';
 export class CurrencyService {
   constructor(private prisma: PrismaService) {}
 
-  async get(filters: any, search, sorter) {
+  async getAll(filters: any, search, sorter) {
     const where: any = {
       ...filters,
       OR: [{ symbol: { contains: search } }, { name: { contains: search } }],
@@ -20,10 +20,22 @@ export class CurrencyService {
     };
   }
 
-  async create(user, data) {
+  async get(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let currency = await this.prisma.currency.findFirst({
+      where,
+    });
+    return {
+      currency,
+    };
+  }
+
+  async create(data) {
     let currency = await this.prisma.currency.create({
       data: {
-        company_id: user.company_id,
+        company_id: data.company_id,
         warehouse_id: data.warehouse_id,
         status: data.status,
         symbol: data.symbol,
@@ -36,8 +48,8 @@ export class CurrencyService {
     };
   }
 
-  async update(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async update(id, data) {
+    let where = { id, company_id: data.company_id };
     await this.prisma.currency.updateMany({
       where,
       data: {

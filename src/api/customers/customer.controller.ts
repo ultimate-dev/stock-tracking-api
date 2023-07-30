@@ -28,8 +28,9 @@ export class CustomerController {
     { search = '', sorter_name = 'id', sorter_dir = 'asc' },
   ) {
     try {
-      let { total, customers } = await this.service.get(
+      let { total, customers } = await this.service.getAll(
         {
+          company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
         },
         search,
@@ -57,6 +58,33 @@ export class CustomerController {
     );
   }
 
+  @Get(':id')
+  async get(
+    @Request() req,
+    @Param('id') id: number,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let { customer } = await this.service.get({
+        id,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        data: { customer },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
   @Put()
   async create(
     @Request() req,
@@ -64,12 +92,16 @@ export class CustomerController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { customer } = await this.service.create(req.user, body);
+      let { customer } = await this.service.create({
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
         status: true,
-
+        message: 'Kayıt Oluşturuldu',
         data: { customer },
       };
     } catch (error) {
@@ -89,12 +121,16 @@ export class CustomerController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { customer } = await this.service.update(req.user, id, body);
+      let { customer } = await this.service.update(id, {
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
 
       return {
         statusCode: 200,
         status: true,
-
+        message: 'Değişiklikler Başarıyla Kaydedildi',
         data: { customer },
       };
     } catch (error) {

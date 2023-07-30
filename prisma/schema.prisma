@@ -201,7 +201,7 @@ model Customer {
 
 model Currency {
   id           Int       @id @default(autoincrement())
-  symbol       String
+  symbol       String    @db.Char(3)
   name         String
   value        Float     @default(1)
   main         Boolean   @default(false)

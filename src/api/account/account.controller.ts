@@ -19,9 +19,12 @@ export class AccountController {
   constructor(private readonly service: AccountService) {}
 
   @Get()
-  async getAll(@Request() req) {
+  async get(@Request() req) {
     try {
-      let { user } = await this.service.get(req.user.id, req.user.company_id);
+      let { user } = await this.service.get({
+        id: req.user.id,
+        company_id: req.user.company_id,
+      });
 
       return {
         statusCode: 200,

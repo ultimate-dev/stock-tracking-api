@@ -26,11 +26,22 @@ export class StockService {
       stockCarts,
     };
   }
+  async getCart(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let stockCart = await this.prisma.stockCart.findFirst({
+      where,
+    });
+    return {
+      stockCart,
+    };
+  }
 
-  async createCart(user, data) {
+  async createCart(data) {
     let stockCart = await this.prisma.stockCart.create({
       data: {
-        company_id: user.company_id,
+        company_id: data.company_id,
         warehouse_id: data.warehouse_id,
         supplier_id: data.supplier_id,
         stock_brand_id: data.stock_brand_id,
@@ -52,8 +63,8 @@ export class StockService {
     };
   }
 
-  async updateCart(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async updateCart(id, data) {
+    let where = { id, company_id: data.company_id };
     await this.prisma.stockCart.updateMany({
       where,
       data: {
@@ -111,10 +122,10 @@ export class StockService {
     };
   }
 
-  async createCategory(user, data) {
+  async createCategory(data) {
     let stockCategory = await this.prisma.stockCategory.create({
       data: {
-        company_id: user.company_id,
+        company_id: data.company_id,
         warehouse_id: data.warehouse_id,
         status: data.status,
         code: data.code,
@@ -127,8 +138,8 @@ export class StockService {
     };
   }
 
-  async updateCategory(user, id, data) {
-    let where = { id, company_id: user.company_id };
+  async updateCategory(id, data) {
+    let where = { id, company_id: data.company_id };
     await this.prisma.stockCategory.updateMany({
       where,
       data: {
