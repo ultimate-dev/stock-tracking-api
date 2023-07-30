@@ -51,7 +51,7 @@ model User {
 
 model Warehouse {
   id                      Int             @id @default(autoincrement())
-  code                    String          @unique @db.Char(6)
+  code                    String          @db.Char(6)
   name                    String
   responsible_person_name String?
   phone                   String?
@@ -78,7 +78,7 @@ model Warehouse {
 
 model StockCart {
   id             Int           @id @default(autoincrement())
-  code           String        @unique @db.Char(6)
+  code           String        @db.Char(6)
   name           String
   barcode        String
   kdv            Float
@@ -111,7 +111,7 @@ model StockCart {
 
 model StockCategory {
   id                  Int                @id @default(autoincrement())
-  code                String             @unique @db.Char(6)
+  code                String             @db.Char(6)
   name                String
   stock_category_type StockCategoryTypes
   //--
@@ -133,7 +133,7 @@ model StockCategory {
 
 model Supplier {
   id           Int         @id @default(autoincrement())
-  code         String      @unique @db.Char(6)
+  code         String      @db.Char(6)
   name         String
   phone        String?
   address      String?
@@ -179,7 +179,7 @@ model Stock {
 
 model Customer {
   id           Int       @id @default(autoincrement())
-  code         String    @unique @db.Char(6)
+  code         String    @db.Char(6)
   name         String
   phone        String?
   address      String?

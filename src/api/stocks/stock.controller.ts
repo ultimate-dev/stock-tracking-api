@@ -134,16 +134,16 @@ export class StockController {
     );
   }
 
-  @Get('categories/:code')
+  @Get('categories/:id')
   async getCategory(
     @Request() req,
-    @Param('code') code: string,
+    @Param('id') id: number,
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
       let { stockCategory } = await this.service.getCategory({
         warehouse_id: parseInt(warehouse_id),
-        code,
+        id,
       });
 
       return {
@@ -188,17 +188,17 @@ export class StockController {
     );
   }
 
-  @Post('categories/:code')
+  @Post('categories/:id')
   async updateCategory(
     @Request() req,
-    @Param('code') code: string,
+    @Param('id') id: number,
     @Body() body,
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
       let { stockCategory } = await this.service.updateCategory(
         req.user,
-        code,
+        id,
         {
           warehouse_id: parseInt(warehouse_id),
           ...body,

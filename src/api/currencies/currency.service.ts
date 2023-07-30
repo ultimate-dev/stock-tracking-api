@@ -14,7 +14,6 @@ export class CurrencyService {
 
     let total = await this.prisma.currency.count({ where });
     let currencies = await this.prisma.currency.findMany({ where, orderBy });
-    console.log(currencies)
     return {
       total,
       currencies,
