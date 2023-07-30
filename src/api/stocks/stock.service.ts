@@ -20,7 +20,16 @@ export class StockService {
     const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
 
     let total = await this.prisma.stockCart.count({ where });
-    let stockCarts = await this.prisma.stockCart.findMany({ where, orderBy });
+    let stockCarts = await this.prisma.stockCart.findMany({
+      where,
+      orderBy,
+      include: {
+        supplier: true,
+        stock_group: true,
+        stock_brand: true,
+        stock_model: true,
+      },
+    });
     return {
       total,
       stockCarts,
