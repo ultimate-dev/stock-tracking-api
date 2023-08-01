@@ -57,7 +57,6 @@ model Warehouse {
   phone                   String?
   address                 String?
   description             String?
-  main                    Boolean         @default(false)
   // --
   status                  Status          @default(ACTIVE)
   createdAt               DateTime        @default(now())

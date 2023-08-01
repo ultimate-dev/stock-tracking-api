@@ -9,6 +9,9 @@ export class AccountService {
     const where = { ...filters };
     let user = await this.prisma.user.findFirst({
       where,
+      include: {
+        company: true,
+      },
     });
     return { user };
   }
