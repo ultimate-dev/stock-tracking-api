@@ -46,7 +46,6 @@ export class WarehouseService {
         phone: data.phone,
         address: data.address,
         description: data.description,
-        main: data.main,
       },
     });
     return {
@@ -66,7 +65,6 @@ export class WarehouseService {
         phone: data.phone,
         address: data.address,
         description: data.description,
-        main: data.main,
       },
     });
     let warehouse = await this.prisma.warehouse.findFirst({
