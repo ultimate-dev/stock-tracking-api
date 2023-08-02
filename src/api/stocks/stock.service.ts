@@ -100,6 +100,23 @@ export class StockService {
     };
   }
 
+  async deleteCart(id, filters) {
+    let where = { id, ...filters };
+    let deleted = await this.prisma.stockCart.updateMany({
+      where,
+      data: { status: 'DELETED' },
+    });
+    return deleted;
+  }
+
+  async codeControlCart(code: string, filters = {}) {
+    let count = await this.prisma.stockCategory.count({
+      where: { code, ...filters },
+    });
+    if (count <= 0) return true;
+    return false;
+  }
+
   // Categories
   async getCategories(filters: any, search, sorter) {
     const where: any = {
@@ -163,5 +180,22 @@ export class StockService {
     return {
       stockCategory,
     };
+  }
+
+  async deleteCategory(id, filters) {
+    let where = { id, ...filters };
+    let deleted = await this.prisma.stockCategory.updateMany({
+      where,
+      data: { status: 'DELETED' },
+    });
+    return deleted;
+  }
+
+  async codeControlCategory(code: string, filters = {}) {
+    let count = await this.prisma.stockCategory.count({
+      where: { code, ...filters },
+    });
+    if (count <= 0) return true;
+    return false;
   }
 }

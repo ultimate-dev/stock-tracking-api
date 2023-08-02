@@ -11,6 +11,7 @@ import {
   Request,
   Headers,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -33,6 +34,7 @@ export class StockController {
         {
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
+          status: 'ACTIVE',
         },
         search,
         { sorter_name, sorter_dir },
@@ -87,18 +89,29 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCart } = await this.service.createCart({
-        ...body,
-        company_id: req.user.company_id,
-        warehouse_id: parseInt(warehouse_id),
+      let code_control = await this.service.codeControlCart(body.code, {
+        status: 'ACTIVE',
       });
+      if (code_control) {
+        let { stockCart } = await this.service.createCart({
+          ...body,
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+        });
 
-      return {
-        statusCode: 200,
-        status: true,
-        message: 'Kayıt Oluşturuldu',
-        data: { stockCart },
-      };
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Kayıt Oluşturuldu',
+          data: { stockCart },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Bu kod zaten tanımlı!',
+        };
+      }
     } catch (error) {
       console.error(error);
     }
@@ -116,17 +129,49 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCart } = await this.service.updateCart(id, {
-        ...body,
-        company_id: req.user.company_id,
-        warehouse_id: parseInt(warehouse_id),
+      let code_control = await this.service.codeControlCart(body.code, {
+        status: 'ACTIVE',
+        NOT: { id },
       });
+      if (code_control) {
+        let { stockCart } = await this.service.updateCart(id, {
+          ...body,
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+        });
 
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Değişiklikler Başarıyla Kaydedildi',
+          data: { stockCart },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Bu kod zaten tanımlı!',
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Delete('carts/:id')
+  async deleteCart(@Request() req, @Param('id') id: number) {
+    try {
+      await this.service.deleteCart(id, {
+        company_id: req.user.company_id,
+      });
       return {
         statusCode: 200,
         status: true,
-        message: 'Değişiklikler Başarıyla Kaydedildi',
-        data: { stockCart },
+        message: 'Kayıt Kaldırıldı.',
       };
     } catch (error) {
       console.error(error);
@@ -151,6 +196,7 @@ export class StockController {
           stock_category_type: type,
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
+          status: 'ACTIVE',
         },
         search,
         { sorter_name, sorter_dir },
@@ -206,18 +252,30 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCategory } = await this.service.createCategory({
-        ...body,
-        company_id: req.user.company_id,
-        warehouse_id: parseInt(warehouse_id),
+      let code_control = await this.service.codeControlCategory(body.code, {
+        status: 'ACTIVE',
       });
+      if (code_control) {
+        let { stockCategory } = await this.service.createCategory({
+          ...body,
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+        });
 
-      return {
-        statusCode: 200,
-        status: true,
-        message: 'Kayıt Oluşturuldu',
-        data: { stockCategory },
-      };
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Kayıt Oluşturuldu',
+          data: { stockCategory },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message:
+            'Bu kod zaten tanımlı!',
+        };
+      }
     } catch (error) {
       console.error(error);
     }
@@ -235,17 +293,49 @@ export class StockController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { stockCategory } = await this.service.updateCategory(id, {
-        ...body,
-        company_id: req.user.company_id,
-        warehouse_id: parseInt(warehouse_id),
+      let code_control = await this.service.codeControlCategory(body.code, {
+        status: 'ACTIVE',
+        NOT: { id },
       });
+      if (code_control) {
+        let { stockCategory } = await this.service.updateCategory(id, {
+          ...body,
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+        });
 
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Değişiklikler Başarıyla Kaydedildi',
+          data: { stockCategory },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message:
+            'Bu kod zaten tanımlı!',
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+  @Delete('categories/:id')
+  async deleteCategory(@Request() req, @Param('id') id: number) {
+    try {
+      await this.service.deleteCategory(id, {
+        company_id: req.user.company_id,
+      });
       return {
         statusCode: 200,
         status: true,
-        message: 'Değişiklikler Başarıyla Kaydedildi',
-        data: { stockCategory },
+        message: 'Kayıt Kaldırıldı.',
       };
     } catch (error) {
       console.error(error);

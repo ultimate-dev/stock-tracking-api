@@ -74,4 +74,31 @@ export class WarehouseService {
       warehouse,
     };
   }
+
+  async delete(id, filters) {
+    let where = { id, ...filters };
+    let deleted = await this.prisma.warehouse.updateMany({
+      where,
+      data: { status: 'DELETED' },
+    });
+    return deleted;
+  }
+
+  async maxCountControl(company_id) {
+    let company = await this.prisma.company.findFirst({
+      where: { id: company_id },
+    });
+    let count = await this.prisma.warehouse.count({ where: { company_id } });
+    if (company.max_warehouse_count > count) {
+      return true;
+    } else return false;
+  }
+
+  async codeControl(code: string, filters = {}) {
+    let count = await this.prisma.warehouse.count({
+      where: { code, ...filters },
+    });
+    if (count <= 0) return true;
+    return false;
+  }
 }

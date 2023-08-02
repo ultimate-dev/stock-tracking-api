@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { WarehouseService } from './warehouse.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -29,6 +30,7 @@ export class WarehouseController {
       let { total, warehouses } = await this.service.getAll(
         {
           company_id: req.user.company_id,
+          status: 'ACTIVE',
         },
         search,
         {
@@ -55,10 +57,7 @@ export class WarehouseController {
   }
 
   @Get(':id')
-  async get(
-    @Request() req,
-    @Param('id') id: number,
-  ) {
+  async get(@Request() req, @Param('id') id: number) {
     try {
       let { warehouse } = await this.service.get({
         id,
@@ -82,17 +81,37 @@ export class WarehouseController {
   @Put()
   async create(@Request() req, @Body() body) {
     try {
-      let { warehouse } = await this.service.create({
-        ...body,
-        company_id: req.user.company_id,
-      });
+      let control = await this.service.maxCountControl(req.user.company_id);
+      if (control) {
+        let code_control = await this.service.codeControl(body.code, {
+          status: 'ACTIVE',
+        });
+        if (code_control) {
+          let { warehouse } = await this.service.create({
+            ...body,
+            company_id: req.user.company_id,
+          });
 
-      return {
-        statusCode: 200,
-        status: true,
-        message: 'Kayıt Oluşturuldu',
-        data: { warehouse },
-      };
+          return {
+            statusCode: 200,
+            status: true,
+            message: 'Kayıt Oluşturuldu',
+            data: { warehouse },
+          };
+        } else {
+          return {
+            statusCode: 200,
+            status: false,
+            message: 'Bu kod zaten tanımlı!',
+          };
+        }
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Depo Hakkınız Dolmuştur!',
+        };
+      }
     } catch (error) {
       console.error(error);
     }
@@ -105,16 +124,48 @@ export class WarehouseController {
   @Post(':id')
   async update(@Request() req, @Param('id') id: number, @Body() body) {
     try {
-      let { warehouse } = await this.service.update(id, {
-        ...body,
+      let code_control = await this.service.codeControl(body.code, {
+        status: 'ACTIVE',
+        NOT: { id },
+      });
+      if (code_control) {
+        let { warehouse } = await this.service.update(id, {
+          ...body,
+          company_id: req.user.company_id,
+        });
+
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Değişiklikler Başarıyla Kaydedildi',
+          data: { warehouse },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Bu kod zaten tanımlı!',
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Delete(':id')
+  async delete(@Request() req, @Param('id') id: number) {
+    try {
+      await this.service.delete(id, {
         company_id: req.user.company_id,
       });
-
       return {
         statusCode: 200,
         status: true,
-        message: 'Değişiklikler Başarıyla Kaydedildi',
-        data: { warehouse },
+        message: 'Kayıt Kaldırıldı.',
       };
     } catch (error) {
       console.error(error);

@@ -70,4 +70,20 @@ export class CustomerService {
       customer,
     };
   }
+  async delete(id, filters) {
+    let where = { id, ...filters };
+    let deleted = await this.prisma.customer.updateMany({
+      where,
+      data: { status: 'DELETED' },
+    });
+    return deleted;
+  }
+
+  async codeControl(code: string, filters = {}) {
+    let count = await this.prisma.customer.count({
+      where: { code, ...filters },
+    });
+    if (count <= 0) return true;
+    return false;
+  }
 }

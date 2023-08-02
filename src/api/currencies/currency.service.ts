@@ -66,4 +66,21 @@ export class CurrencyService {
       currency,
     };
   }
+
+  async delete(id, filters) {
+    let where = { id, ...filters };
+    let deleted = await this.prisma.currency.updateMany({
+      where,
+      data: { status: 'DELETED' },
+    });
+    return deleted;
+  }
+
+  async symbolControl(symbol: string, filters = {}) {
+    let count = await this.prisma.currency.count({
+      where: { symbol, ...filters },
+    });
+    if (count <= 0) return true;
+    return false;
+  }
 }

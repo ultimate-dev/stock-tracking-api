@@ -11,6 +11,7 @@ import {
   Request,
   Headers,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { SupplierService } from './supplier.service';
@@ -33,6 +34,7 @@ export class SupplierController {
         {
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
+          status: 'ACTIVE',
         },
         search,
         {
@@ -90,18 +92,29 @@ export class SupplierController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { supplier } = await this.service.create({
-        ...body,
-        company_id: req.user.company_id,
-        warehouse_id: parseInt(warehouse_id),
+      let code_control = await this.service.codeControl(body.code, {
+        status: 'ACTIVE',
       });
+      if (code_control) {
+        let { supplier } = await this.service.create({
+          ...body,
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+        });
 
-      return {
-        statusCode: 200,
-        status: true,
-        message: 'Kayıt Oluşturuldu',
-        data: { supplier },
-      };
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Kayıt Oluşturuldu',
+          data: { supplier },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Bu kod zaten tanımlı!',
+        };
+      }
     } catch (error) {
       console.error(error);
     }
@@ -119,17 +132,49 @@ export class SupplierController {
     @Headers('warehouse_id') warehouse_id,
   ) {
     try {
-      let { supplier } = await this.service.update(id, {
-        ...body,
-        company_id: req.user.company_id,
-        warehouse_id: parseInt(warehouse_id),
+      let code_control = await this.service.codeControl(body.code, {
+        status: 'ACTIVE',
+        NOT: { id },
       });
+      if (code_control) {
+        let { supplier } = await this.service.update(id, {
+          ...body,
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+        });
 
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Değişiklikler Başarıyla Kaydedildi',
+          data: { supplier },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Bu kod zaten tanımlı!',
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Delete(':id')
+  async delete(@Request() req, @Param('id') id: number) {
+    try {
+      await this.service.delete(id, {
+        company_id: req.user.company_id,
+      });
       return {
         statusCode: 200,
         status: true,
-        message: 'Değişiklikler Başarıyla Kaydedildi',
-        data: { supplier },
+        message: 'Kayıt Kaldırıldı.',
       };
     } catch (error) {
       console.error(error);

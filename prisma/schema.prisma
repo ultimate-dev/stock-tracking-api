@@ -12,22 +12,23 @@ datasource db {
 
 // MODELS
 model Company {
-  id              Int             @id @default(autoincrement())
-  name            String
-  logo            String?
+  id                  Int             @id @default(autoincrement())
+  name                String
+  logo                String?
+  max_warehouse_count Int             @default(1)
   // --
-  status          Status          @default(ACTIVE)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  status              Status          @default(ACTIVE)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
   // --
-  users           User[]
-  warehouse       Warehouse[]
-  suppliers       Supplier[]
-  stocks          Stock[]
-  stockCarts      StockCart[]
-  stockCategories StockCategory[]
-  customers       Customer[]
-  currencies      Currency[]
+  users               User[]
+  warehouse           Warehouse[]
+  suppliers           Supplier[]
+  stocks              Stock[]
+  stock_carts         StockCart[]
+  stock_categories    StockCategory[]
+  customers           Customer[]
+  currencies          Currency[]
 
   @@map("companies")
 }
@@ -38,6 +39,7 @@ model User {
   password   String
   name       String
   surname    String
+  admin      Boolean  @default(false)
   // --
   status     Status   @default(ACTIVE)
   createdAt  DateTime @default(now())

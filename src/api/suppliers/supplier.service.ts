@@ -70,4 +70,21 @@ export class SupplierService {
       supplier,
     };
   }
+
+  async delete(id, filters) {
+    let where = { id, ...filters };
+    let deleted = await this.prisma.supplier.updateMany({
+      where,
+      data: { status: 'DELETED' },
+    });
+    return deleted;
+  }
+
+  async codeControl(code: string, filters = {}) {
+    let count = await this.prisma.supplier.count({
+      where: { code, ...filters },
+    });
+    if (count <= 0) return true;
+    return false;
+  }
 }
