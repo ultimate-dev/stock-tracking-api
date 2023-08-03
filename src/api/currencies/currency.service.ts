@@ -40,7 +40,7 @@ export class CurrencyService {
         status: data.status,
         symbol: data.symbol,
         name: data.name,
-        value: data.value,
+        value: data.value
       },
     });
     return {

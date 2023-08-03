@@ -94,6 +94,7 @@ export class SupplierController {
     try {
       let code_control = await this.service.codeControl(body.code, {
         status: 'ACTIVE',
+        warehouse_id: parseInt(warehouse_id)
       });
       if (code_control) {
         let { supplier } = await this.service.create({
@@ -134,7 +135,7 @@ export class SupplierController {
     try {
       let code_control = await this.service.codeControl(body.code, {
         status: 'ACTIVE',
-        NOT: { id },
+        NOT: { id, warehouse_id: parseInt(warehouse_id), },
       });
       if (code_control) {
         let { supplier } = await this.service.update(id, {

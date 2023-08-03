@@ -91,6 +91,7 @@ export class StockController {
     try {
       let code_control = await this.service.codeControlCart(body.code, {
         status: 'ACTIVE',
+        warehouse_id: parseInt(warehouse_id),
       });
       if (code_control) {
         let { stockCart } = await this.service.createCart({
@@ -131,7 +132,7 @@ export class StockController {
     try {
       let code_control = await this.service.codeControlCart(body.code, {
         status: 'ACTIVE',
-        NOT: { id },
+        NOT: { id, warehouse_id: parseInt(warehouse_id) },
       });
       if (code_control) {
         let { stockCart } = await this.service.updateCart(id, {
@@ -254,6 +255,8 @@ export class StockController {
     try {
       let code_control = await this.service.codeControlCategory(body.code, {
         status: 'ACTIVE',
+        stock_category_type: body.stock_category_type,
+        warehouse_id: parseInt(warehouse_id),
       });
       if (code_control) {
         let { stockCategory } = await this.service.createCategory({
@@ -272,8 +275,7 @@ export class StockController {
         return {
           statusCode: 200,
           status: false,
-          message:
-            'Bu kod zaten tanımlı!',
+          message: 'Bu kod zaten tanımlı!',
         };
       }
     } catch (error) {
@@ -295,7 +297,8 @@ export class StockController {
     try {
       let code_control = await this.service.codeControlCategory(body.code, {
         status: 'ACTIVE',
-        NOT: { id },
+        stock_category_type: body.stock_category_type,
+        NOT: { id, warehouse_id: parseInt(warehouse_id) },
       });
       if (code_control) {
         let { stockCategory } = await this.service.updateCategory(id, {
@@ -314,8 +317,7 @@ export class StockController {
         return {
           statusCode: 200,
           status: false,
-          message:
-            'Bu kod zaten tanımlı!',
+          message: 'Bu kod zaten tanımlı!',
         };
       }
     } catch (error) {

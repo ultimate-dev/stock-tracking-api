@@ -96,6 +96,7 @@ export class CurrencyController {
     try {
       let code_control = await this.service.symbolControl(body.symbol, {
         status: 'ACTIVE',
+        warehouse_id: parseInt(warehouse_id)
       });
       if (code_control) {
         let { currency } = await this.service.create({
@@ -136,7 +137,7 @@ export class CurrencyController {
     try {
       let code_control = await this.service.symbolControl(body.symbol, {
         status: 'ACTIVE',
-        NOT: { id },
+        NOT: { id, warehouse_id: parseInt(warehouse_id) },
       });
       if (code_control) {
         let { currency } = await this.service.update(id, {
