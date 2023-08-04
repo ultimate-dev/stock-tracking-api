@@ -22,13 +22,14 @@ model Company {
   updatedAt           DateTime        @updatedAt
   // --
   users               User[]
-  warehouse           Warehouse[]
+  warehouses          Warehouse[]
   suppliers           Supplier[]
   stocks              Stock[]
   stock_carts         StockCart[]
   stock_categories    StockCategory[]
   customers           Customer[]
   currencies          Currency[]
+  //
 
   @@map("companies")
 }
@@ -55,6 +56,8 @@ model Warehouse {
   id                      Int             @id @default(autoincrement())
   code                    String          @db.Char(6)
   name                    String
+  main_currency_symbol    String          @db.Char(3)
+  main_currency_name      String
   responsible_person_name String?
   phone                   String?
   address                 String?
@@ -205,7 +208,6 @@ model Currency {
   symbol       String    @db.Char(3)
   name         String
   value        Float     @default(1)
-  main         Boolean   @default(false)
   // --
   status       Status    @default(ACTIVE)
   createdAt    DateTime  @default(now())
@@ -215,6 +217,7 @@ model Currency {
   company      Company   @relation(fields: [company_id], references: [id])
   warehouse_id Int
   warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+  //--
 
   @@map("currencies")
 }
