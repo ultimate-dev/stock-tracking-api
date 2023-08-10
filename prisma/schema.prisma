@@ -164,6 +164,7 @@ model Stock {
   date          DateTime    @default(now())
   description   String?
   stock_type    StockTypes?
+  data          Json?
   // --
   company_id    Int
   company       Company     @relation(fields: [company_id], references: [id])

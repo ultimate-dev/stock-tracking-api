@@ -21,6 +21,227 @@ import { AuthGuard } from '@nestjs/passport';
 export class StockController {
   constructor(private readonly service: StockService) {}
 
+  getDate(day) {
+    const today = new Date();
+    const date = new Date(today);
+    date.setDate(today.getDate() + day);
+    return date;
+  }
+
+  @Get()
+  async get(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    {
+      search = '',
+      sorter_name = 'stock_cart_id',
+      sorter_dir = 'asc',
+      start_date = this.getDate(-30),
+      end_date = this.getDate(1),
+    },
+  ) {
+    try {
+      let { total, stocks } = await this.service.getAll(
+        {
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+          status: 'ACTIVE',
+          date: {
+            gte: new Date(start_date),
+            lte: new Date(end_date),
+          },
+        },
+        search,
+        { sorter_name, sorter_dir },
+      );
+
+      return {
+        statusCode: 200,
+        status: true,
+        data: { total, stocks },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Get('movements')
+  async getMovements(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    {
+      search = '',
+      sorter_name = 'date',
+      sorter_dir = 'desc',
+      start_date = this.getDate(-30),
+      end_date = this.getDate(1),
+    },
+  ) {
+    try {
+      let { total, stockMovements } = await this.service.getMovements(
+        {
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+          status: 'ACTIVE',
+          date: {
+            gte: new Date(start_date),
+            lte: new Date(end_date),
+          },
+        },
+        search,
+        { sorter_name, sorter_dir },
+      );
+
+      return {
+        statusCode: 200,
+        status: true,
+        data: { total, stockMovements },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Get('income-and-expense')
+  async getIncomeAndExpense(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    {
+      search = '',
+      sorter_name = 'date',
+      sorter_dir = 'desc',
+      start_date = this.getDate(-30),
+      end_date = this.getDate(1),
+    },
+  ) {
+    try {
+      let { total, income_and_expense } =
+        await this.service.getIncomeAndExpense(
+          {
+            company_id: req.user.company_id,
+            warehouse_id: parseInt(warehouse_id),
+            status: 'ACTIVE',
+            date: {
+              gte: new Date(start_date),
+              lte: new Date(end_date),
+            },
+          },
+          search,
+          { sorter_name, sorter_dir },
+        );
+      return {
+        statusCode: 200,
+        status: true,
+        data: { total, income_and_expense },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Get('current-accounts')
+  async getCurrentAccounts(
+    @Request() req,
+    @Headers('warehouse_id') warehouse_id,
+    @Query()
+    { search = '', sorter_name = 'stock_cart_id', sorter_dir = 'desc' },
+  ) {
+    try {
+      let { total, currentAccounts } = await this.service.getCurrentAccounts(
+        {
+          company_id: req.user.company_id,
+          warehouse_id: parseInt(warehouse_id),
+          status: 'ACTIVE',
+        },
+        search,
+        { sorter_name, sorter_dir },
+      );
+      return {
+        statusCode: 200,
+        status: true,
+        data: { total, currentAccounts },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Put()
+  async create(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let { stock } = await this.service.create({
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        message: 'Kayıt Oluşturuldu',
+        data: { stock },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Post(':id')
+  async update(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let { stock } = await this.service.update(id, {
+        ...body,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        message: 'Değişiklikler Başarıyla Kaydedildi',
+        data: { stock },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
   // Carts
   @Get('carts')
   async getCarts(

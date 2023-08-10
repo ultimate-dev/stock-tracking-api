@@ -1,11 +1,324 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'db/prisma.service';
+import * as _ from 'lodash';
+import * as moment from 'moment';
 
 @Injectable()
 export class StockService {
   constructor(private prisma: PrismaService) {}
 
   // Stock
+  async getAll(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [
+        {
+          stock_cart: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+              { barcode: { contains: search } },
+            ],
+          },
+        },
+        {
+          customer: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+            ],
+          },
+        },
+      ],
+    };
+
+    let stockGroups = await this.prisma.stock.groupBy({
+      where,
+      by: ['stock_cart_id'],
+      _sum: {
+        quantity: true,
+      },
+    });
+
+    let stocks = [];
+
+    await Promise.all(
+      stockGroups.map(async (group) => {
+        let stockCart = await this.prisma.stockCart.findFirst({
+          where: { id: group.stock_cart_id },
+        });
+        stocks.push({ ...group, stockCart });
+      }),
+    );
+
+    return {
+      total: stockGroups.length,
+      stocks: _.orderBy(stocks, [sorter.sorter_name], [sorter.sorter_dir]),
+    };
+  }
+  async getMovements(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [
+        {
+          stock_cart: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+              { barcode: { contains: search } },
+            ],
+          },
+        },
+        {
+          customer: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+            ],
+          },
+        },
+      ],
+    };
+    const orderBy: any = { [sorter.sorter_name]: sorter.sorter_dir };
+
+    let total = await this.prisma.stock.count({ where });
+    let data = await this.prisma.stock.findMany({
+      where,
+      orderBy,
+    });
+    let stockMovements = [];
+    await Promise.all(
+      data.map((item, index) => {
+        let prevItems = data.slice(0, index + 1);
+        stockMovements.push({
+          ...item,
+          stock: prevItems.reduce((sum, curr) => sum + curr.quantity, 0),
+        });
+      }),
+    );
+
+    return {
+      total,
+      stockMovements,
+    };
+  }
+  async getIncomeAndExpense(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      OR: [
+        {
+          stock_cart: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+              { barcode: { contains: search } },
+            ],
+          },
+        },
+        {
+          customer: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+            ],
+          },
+        },
+      ],
+    };
+    let data = await this.prisma.stock.findMany({
+      select: {
+        date: true,
+        price: true,
+        quantity: true,
+        stock_type: true,
+      },
+      where,
+    });
+    let date_group = _.groupBy(data, (item) =>
+      moment(item.date).format('YYYY-MM-DD'),
+    );
+    let income_and_expense = [];
+    await Promise.all(
+      Object.entries(date_group).map(([key, item]) => {
+        let _sum = {
+          price: 0,
+        };
+        let _sum_income = {
+          price: 0,
+        };
+
+        let _sum_expense = {
+          price: 0,
+        };
+        item.map(({ price, quantity, stock_type }) => {
+          if (stock_type == 'SUPPLY' || stock_type == 'RETURN') {
+            _sum_expense.price += quantity * price;
+          } else if (stock_type == 'SELL' || stock_type == 'TRASH') {
+            _sum_income.price += Math.abs(quantity * price);
+          }
+        });
+        _sum.price = _sum_expense.price + _sum_income.price;
+
+        income_and_expense.push({
+          date: item[0].date,
+          _sum,
+          _sum_income,
+          _sum_expense,
+        });
+      }),
+    );
+    return {
+      total: income_and_expense.length,
+      income_and_expense: _.orderBy(
+        income_and_expense,
+        [sorter.sorter_name],
+        [sorter.sorter_dir],
+      ),
+    };
+  }
+  async getCurrentAccounts(filters: any, search, sorter) {
+    let currentAccounts = {};
+
+    const where = { ...filters };
+
+    let stocks = await this.prisma.stock.findMany({
+      where,
+      include: {
+        stock_cart: { include: { supplier: true } },
+        customer: true,
+      },
+    });
+
+    await Promise.all(
+      stocks.map(async (stock) => {
+        let obj = { quantity: 0, price: 0 };
+        const sKey = 's-' + stock.stock_cart.supplier_id;
+        if (!currentAccounts[sKey]) currentAccounts[sKey] = obj;
+        currentAccounts[sKey]['current'] = 'supplier';
+        currentAccounts[sKey]['account'] = stock.stock_cart.supplier;
+
+        if (stock.customer_id) {
+          const cKey = 'c-' + stock.customer_id;
+          if (!currentAccounts[cKey]) currentAccounts[cKey] = obj;
+          currentAccounts[cKey]['current'] = 'customer';
+          currentAccounts[cKey]['account'] = stock.customer;
+        }
+      }),
+    );
+
+    return {
+      total: Object.keys(currentAccounts).length,
+      currentAccounts: _.orderBy(
+        Object.values(currentAccounts),
+        [sorter.sorter_name],
+        [sorter.sorter_dir],
+      ),
+    };
+  }
+  //
+  async stockData(data) {
+    let stockCart = null;
+    if (data.stock_cart_id) {
+      stockCart = await this.prisma.stockCart.findFirst({
+        where: {
+          id: data.stock_cart_id,
+          company_id: data.company_id,
+          warehouse_id: data.warehouse_id,
+        },
+        include: {
+          supplier: true,
+          stock_brand: true,
+          stock_group: true,
+          stock_model: true,
+        },
+      });
+    }
+    let customer = null;
+    if (data.customer_id) {
+      customer = await this.prisma.customer.findFirst({
+        where: {
+          id: data.customer_id,
+          company_id: data.company_id,
+          warehouse_id: data.warehouse_id,
+        },
+      });
+    }
+    return { stockCart, customer };
+  }
+  exDir(stock_type) {
+    return {
+      q:
+        stock_type == 'SUPPLY' || stock_type == 'RETURN'
+          ? 1
+          : stock_type == 'SELL' || stock_type == 'TRASH'
+          ? -1
+          : 0,
+      p:
+        stock_type == 'SUPPLY' || stock_type == 'RETURN'
+          ? -1
+          : stock_type == 'SELL'
+          ? 1
+          : 0,
+    };
+  }
+  async create(data) {
+    let stock_type = data.stock_type;
+
+    let quantity = data.quantity * this.exDir(stock_type).q;
+    let price = data.price * this.exDir(stock_type).p;
+
+    let stock = await this.prisma.stock.create({
+      data: {
+        company_id: data.company_id,
+        warehouse_id: data.warehouse_id,
+        status: data.status,
+        stock_type,
+        stock_cart_id: data.stock_cart_id,
+        quantity,
+        price,
+        customer_id: data.customer_id,
+        date: new Date(data.date),
+        description: data.description,
+        data: await this.stockData(data),
+      },
+    });
+    return {
+      stock,
+    };
+  }
+  async update(id, data) {
+    let where = {
+      id,
+      warehouse_id: data.warehouse_id,
+      company_id: data.company_id,
+    };
+    let stock_type = data.stock_type;
+    console.log(stock_type);
+
+    let quantity = data.quantity * this.exDir(stock_type).q;
+    let price = data.price * this.exDir(stock_type).p;
+
+    await this.prisma.stock.updateMany({
+      where,
+      data: {
+        status: data.status,
+        stock_type,
+        stock_cart_id: data.stock_cart_id,
+        quantity,
+        price,
+        customer_id: data.customer_id,
+        date: new Date(data.date),
+        description: data.description,
+        data: await this.stockData(data),
+      },
+    });
+    let stock = await this.prisma.stock.findFirst({
+      where,
+    });
+    return {
+      stock,
+    };
+  }
 
   // Carts
   async getCarts(filters: any, search, sorter) {
