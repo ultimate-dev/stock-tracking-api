@@ -29,7 +29,7 @@ export class StockController {
   }
 
   @Get()
-  async get(
+  async getAll(
     @Request() req,
     @Headers('warehouse_id') warehouse_id,
     @Query()
@@ -51,6 +51,9 @@ export class StockController {
             gte: new Date(start_date),
             lte: new Date(end_date),
           },
+          stock_cart: {
+            status: 'ACTIVE',
+          },
         },
         search,
         { sorter_name, sorter_dir },
@@ -60,6 +63,33 @@ export class StockController {
         statusCode: 200,
         status: true,
         data: { total, stocks },
+      };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Get('one/:id')
+  async get(
+    @Request() req,
+    @Param('id') id: number,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let { stock } = await this.service.get({
+        id,
+        company_id: req.user.company_id,
+        warehouse_id: parseInt(warehouse_id),
+      });
+
+      return {
+        statusCode: 200,
+        status: true,
+        data: { stock },
       };
     } catch (error) {
       console.error(error);
@@ -184,6 +214,7 @@ export class StockController {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
+
 
   @Put()
   async create(

@@ -177,45 +177,24 @@ export class StockService {
     };
   }
   async getCurrentAccounts(filters: any, search, sorter) {
-    let currentAccounts = {};
-
-    const where = { ...filters };
-
-    let stocks = await this.prisma.stock.findMany({
-      where,
-      include: {
-        stock_cart: { include: { supplier: true } },
-        customer: true,
-      },
-    });
-
-    await Promise.all(
-      stocks.map(async (stock) => {
-        let obj = { quantity: 0, price: 0 };
-        const sKey = 's-' + stock.stock_cart.supplier_id;
-        if (!currentAccounts[sKey]) currentAccounts[sKey] = obj;
-        currentAccounts[sKey]['current'] = 'supplier';
-        currentAccounts[sKey]['account'] = stock.stock_cart.supplier;
-
-        if (stock.customer_id) {
-          const cKey = 'c-' + stock.customer_id;
-          if (!currentAccounts[cKey]) currentAccounts[cKey] = obj;
-          currentAccounts[cKey]['current'] = 'customer';
-          currentAccounts[cKey]['account'] = stock.customer;
-        }
-      }),
-    );
 
     return {
-      total: Object.keys(currentAccounts).length,
-      currentAccounts: _.orderBy(
-        Object.values(currentAccounts),
-        [sorter.sorter_name],
-        [sorter.sorter_dir],
-      ),
+      total: 0,
+      currentAccounts: [],
     };
   }
   //
+  async get(filters: any) {
+    const where: any = {
+      ...filters,
+    };
+    let stock = await this.prisma.stock.findFirst({
+      where,
+    });
+    return {
+      stock,
+    };
+  }
   async stockData(data) {
     let stockCart = null;
     if (data.stock_cart_id) {
@@ -280,6 +259,7 @@ export class StockService {
         date: new Date(data.date),
         description: data.description,
         data: await this.stockData(data),
+        payment_status: data.payment_status,
       },
     });
     return {
@@ -310,6 +290,7 @@ export class StockService {
         date: new Date(data.date),
         description: data.description,
         data: await this.stockData(data),
+        payment_status: data.payment_status,
       },
     });
     let stock = await this.prisma.stock.findFirst({
