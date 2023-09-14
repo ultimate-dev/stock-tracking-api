@@ -105,6 +105,7 @@ export class StockService {
   async getIncomeAndExpense(filters: any, search, sorter) {
     const where: any = {
       ...filters,
+
       OR: [
         {
           stock_cart: {
@@ -177,10 +178,92 @@ export class StockService {
     };
   }
   async getCurrentAccounts(filters: any, search, sorter) {
+    const where: any = {
+      ...filters,
+      payment_status: false,
+      OR: [
+        {
+          stock_cart: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+              { barcode: { contains: search } },
+            ],
+          },
+        },
+        {
+          customer: {
+            OR: [
+              { code: { contains: search } },
+              { name: { contains: search } },
+            ],
+          },
+        },
+      ],
+      
+    };
+
+    let currentAccounts = [];
+    let customers = await this.prisma.customer.findMany({
+      where: { status: 'ACTIVE' },
+    });
+    let suppliers = await this.prisma.supplier.findMany({
+      where: { status: 'ACTIVE' },
+    });
+
+    await Promise.all(
+      customers.map(async (item) => {
+        let price = 0;
+        let stocks = await this.prisma.stock.findMany({
+          where: {
+            ...where,
+            stock_type: 'SELL',
+            customer_id: item.id,
+            payment_status: false,
+          },
+        });
+
+        await Promise.all(
+          stocks.map((stock) => (price += Math.abs(stock.quantity) * stock.price)),
+        );
+
+        currentAccounts.push({
+          customer_id: item.id,
+          name: item.name,
+          price,
+          type: 'CUSTOMER',
+        });
+      }),
+    );
+
+    await Promise.all(
+      suppliers.map(async (item) => {
+        let price = 0;
+        let stocks = await this.prisma.stock.findMany({
+          where: {
+            ...where,
+            stock_type: 'SUPPLY',
+            stock_cart: { supplier_id: item.id },
+            payment_status: false,
+          },
+        });
+
+        await Promise.all(
+          stocks.map((stock) => (price += Math.abs(stock.quantity) * stock.price)),
+        );
+
+        currentAccounts.push({
+          supplier_id: item.id,
+          name: item.name,
+          price,
+          type: 'SUPPLIER',
+        });
+      }),
+    );
 
     return {
       total: 0,
-      currentAccounts: [],
+      currentAccounts,
     };
   }
   //
@@ -273,7 +356,6 @@ export class StockService {
       company_id: data.company_id,
     };
     let stock_type = data.stock_type;
-    console.log(stock_type);
 
     let quantity = data.quantity * this.exDir(stock_type).q;
     let price = data.price * this.exDir(stock_type).p;

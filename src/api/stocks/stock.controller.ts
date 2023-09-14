@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { AuthGuard } from '@nestjs/passport';
+import params from 'utils/params';
 
 @Controller('stocks')
 @UseGuards(AuthGuard('jwt'))
@@ -111,6 +112,9 @@ export class StockController {
       sorter_dir = 'desc',
       start_date = this.getDate(-30),
       end_date = this.getDate(1),
+      query_name,
+      query_id,
+      query_value,
     },
   ) {
     try {
@@ -123,6 +127,7 @@ export class StockController {
             gte: new Date(start_date),
             lte: new Date(end_date),
           },
+          ...params.queryGenerator(query_name, query_value, query_id),
         },
         search,
         { sorter_name, sorter_dir },
@@ -153,6 +158,9 @@ export class StockController {
       sorter_dir = 'desc',
       start_date = this.getDate(-30),
       end_date = this.getDate(1),
+      query_name,
+      query_id,
+      query_value,
     },
   ) {
     try {
@@ -166,6 +174,7 @@ export class StockController {
               gte: new Date(start_date),
               lte: new Date(end_date),
             },
+            ...params.queryGenerator(query_name, query_value, query_id),
           },
           search,
           { sorter_name, sorter_dir },
@@ -189,7 +198,13 @@ export class StockController {
     @Request() req,
     @Headers('warehouse_id') warehouse_id,
     @Query()
-    { search = '', sorter_name = 'stock_cart_id', sorter_dir = 'desc' },
+    {
+      search = '',
+      sorter_name = 'stock_cart_id',
+      sorter_dir = 'desc',
+      start_date = this.getDate(-30),
+      end_date = this.getDate(1),
+    },
   ) {
     try {
       let { total, currentAccounts } = await this.service.getCurrentAccounts(
@@ -197,6 +212,13 @@ export class StockController {
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
           status: 'ACTIVE',
+          date: {
+            gte: new Date(start_date),
+            lte: new Date(end_date),
+          },
+          stock_cart: {
+            status: 'ACTIVE',
+          },
         },
         search,
         { sorter_name, sorter_dir },
@@ -214,7 +236,6 @@ export class StockController {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
-
 
   @Put()
   async create(
@@ -235,6 +256,49 @@ export class StockController {
         message: 'Kayıt Oluşturuldu',
         data: { stock },
       };
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Put('/operations')
+  async createOperation(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      let data: any[] = body;
+      let stocks = [];
+
+      if (data && data.length > 0) {
+        await Promise.all(
+          data.map(async (item) => {
+            let { stock } = await this.service.create({
+              ...item,
+              company_id: req.user.company_id,
+              warehouse_id: parseInt(warehouse_id),
+            });
+            stocks.push(stock);
+          }),
+        );
+        return {
+          statusCode: 200,
+          status: true,
+          message: 'Kayıt Oluşturuldu',
+          data: { stocks },
+        };
+      } else {
+        return {
+          statusCode: 200,
+          status: false,
+          message: 'Eksik bilgi! Eklenecek Stok bulunamadı!',
+        };
+      }
     } catch (error) {
       console.error(error);
     }
@@ -279,7 +343,14 @@ export class StockController {
     @Request() req,
     @Headers('warehouse_id') warehouse_id,
     @Query()
-    { search = '', sorter_name = 'id', sorter_dir = 'asc' },
+    {
+      search = '',
+      sorter_name = 'id',
+      sorter_dir = 'asc',
+      query_name,
+      query_id,
+      query_value,
+    },
   ) {
     try {
       let { total, stockCarts } = await this.service.getCarts(
@@ -287,6 +358,7 @@ export class StockController {
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
           status: 'ACTIVE',
+          ...params.queryGenerator(query_name, query_value, query_id),
         },
         search,
         { sorter_name, sorter_dir },

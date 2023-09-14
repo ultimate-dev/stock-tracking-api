@@ -27,8 +27,21 @@ export class CustomerService {
     let customer = await this.prisma.customer.findFirst({
       where,
     });
+    let price = 0;
+    let stocks = await this.prisma.stock.findMany({
+      where: {
+        status: 'ACTIVE',
+        customer_id: customer.id,
+        stock_type: 'SELL',
+        payment_status: false,
+      },
+    });
+
+    await Promise.all(
+      stocks.map((stock) => (price += Math.abs(stock.quantity) * stock.price)),
+    );
     return {
-      customer,
+      customer: { ...customer, price },
     };
   }
 

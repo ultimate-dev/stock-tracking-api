@@ -27,8 +27,21 @@ export class SupplierService {
     let supplier = await this.prisma.supplier.findFirst({
       where,
     });
+    let price = 0;
+    let stocks = await this.prisma.stock.findMany({
+      where: {
+        status: 'ACTIVE',
+        stock_cart: { supplier_id: supplier.id },
+        stock_type: 'SUPPLY',
+        payment_status: false,
+      },
+    });
+
+    await Promise.all(
+      stocks.map((stock) => (price += Math.abs(stock.quantity) * stock.price)),
+    );
     return {
-      supplier,
+      supplier: { ...supplier, price },
     };
   }
 
