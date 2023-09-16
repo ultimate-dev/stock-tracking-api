@@ -10,6 +10,11 @@ export class AppController {
     return this.appService.hello();
   }
 
+  @Get("client/version")
+  getVersiyon() {
+    return this.appService.version();
+  }
+
   @Post()
   postHello() {
     return this.appService.hello();

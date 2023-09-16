@@ -8,4 +8,8 @@ export class AppService {
   hello() {
     return { data: 'Helloworld' };
   }
+
+  version() {
+    return { data: process.env.CLIENT_VERSION };
+  }
 }
