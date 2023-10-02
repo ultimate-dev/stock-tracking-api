@@ -177,9 +177,10 @@ export class StockService {
       ),
     };
   }
-  async getCurrentAccounts(filters: any, search, sorter) {
+  async getCurrentAccounts(filters1: any, filters2: any, search, sorter) {
     const where: any = {
-      ...filters,
+      ...filters1,
+      ...filters2,
       payment_status: false,
       OR: [
         {
@@ -200,15 +201,14 @@ export class StockService {
           },
         },
       ],
-      
     };
 
     let currentAccounts = [];
     let customers = await this.prisma.customer.findMany({
-      where: { status: 'ACTIVE' },
+      where: { ...filters1 },
     });
     let suppliers = await this.prisma.supplier.findMany({
-      where: { status: 'ACTIVE' },
+      where: { ...filters1 },
     });
 
     await Promise.all(
@@ -224,7 +224,9 @@ export class StockService {
         });
 
         await Promise.all(
-          stocks.map((stock) => (price += Math.abs(stock.quantity) * stock.price)),
+          stocks.map(
+            (stock) => (price += Math.abs(stock.quantity) * stock.price),
+          ),
         );
 
         currentAccounts.push({
@@ -249,7 +251,9 @@ export class StockService {
         });
 
         await Promise.all(
-          stocks.map((stock) => (price += Math.abs(stock.quantity) * stock.price)),
+          stocks.map(
+            (stock) => (price += Math.abs(stock.quantity) * stock.price),
+          ),
         );
 
         currentAccounts.push({

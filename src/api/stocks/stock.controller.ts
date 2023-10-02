@@ -212,6 +212,8 @@ export class StockController {
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
           status: 'ACTIVE',
+        },
+        {
           date: {
             gte: new Date(start_date),
             lte: new Date(end_date),
