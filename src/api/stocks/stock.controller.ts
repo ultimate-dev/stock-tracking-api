@@ -38,8 +38,6 @@ export class StockController {
       search = '',
       sorter_name = 'stock_cart_id',
       sorter_dir = 'asc',
-      start_date = this.getDate(-30),
-      end_date = this.getDate(1),
     },
   ) {
     try {
@@ -48,10 +46,6 @@ export class StockController {
           company_id: req.user.company_id,
           warehouse_id: parseInt(warehouse_id),
           status: 'ACTIVE',
-          date: {
-            gte: new Date(start_date),
-            lte: new Date(end_date),
-          },
           stock_cart: {
             status: 'ACTIVE',
           },
@@ -202,8 +196,6 @@ export class StockController {
       search = '',
       sorter_name = 'stock_cart_id',
       sorter_dir = 'desc',
-      start_date = this.getDate(-30),
-      end_date = this.getDate(1),
     },
   ) {
     try {
@@ -214,10 +206,6 @@ export class StockController {
           status: 'ACTIVE',
         },
         {
-          date: {
-            gte: new Date(start_date),
-            lte: new Date(end_date),
-          },
           stock_cart: {
             status: 'ACTIVE',
           },
