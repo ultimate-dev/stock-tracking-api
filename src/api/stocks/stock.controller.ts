@@ -34,11 +34,7 @@ export class StockController {
     @Request() req,
     @Headers('warehouse_id') warehouse_id,
     @Query()
-    {
-      search = '',
-      sorter_name = 'stock_cart_id',
-      sorter_dir = 'asc',
-    },
+    { search = '', sorter_name = 'stock_cart_id', sorter_dir = 'asc' },
   ) {
     try {
       let { total, stocks } = await this.service.getAll(
@@ -192,11 +188,7 @@ export class StockController {
     @Request() req,
     @Headers('warehouse_id') warehouse_id,
     @Query()
-    {
-      search = '',
-      sorter_name = 'stock_cart_id',
-      sorter_dir = 'desc',
-    },
+    { search = '', sorter_name = 'stock_cart_id', sorter_dir = 'desc' },
   ) {
     try {
       let { total, currentAccounts } = await this.service.getCurrentAccounts(
@@ -289,6 +281,55 @@ export class StockController {
           message: 'Eksik bilgi! Eklenecek Stok bulunamadı!',
         };
       }
+    } catch (error) {
+      console.error(error);
+    }
+    throw new HttpException(
+      'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  @Post('/price_update')
+  async priceUpdate(
+    @Request() req,
+    @Body() body,
+    @Headers('warehouse_id') warehouse_id,
+  ) {
+    try {
+      console.log(body)
+      let { ids = [], type = 'PERCENT', value1 = 0, value2 = 0 } = body;
+      await Promise.all(
+        ids.map(async (id) => {
+          let { stockCart } = await this.service.getCart(id);
+
+          await this.service.updateCart(id, {
+            supply_price:
+              stockCart.supply_price +
+              (type == 'PERCENT'
+                ? (stockCart.supply_price * value1) / 100
+                : type == 'UNIT'
+                ? value1
+                : 0),
+            sell_price:
+              stockCart.sell_price +
+              (type == 'PERCENT'
+                ? (stockCart.sell_price * value2) / 100
+                : type == 'UNIT'
+                ? value2
+                : 0),
+            company_id: req.user.company_id,
+            warehouse_id: parseInt(warehouse_id),
+          });
+        }),
+      );
+
+      return {
+        statusCode: 200,
+        status: true,
+        message: 'Değişiklikler Başarıyla Kaydedildi',
+        data: {},
+      };
     } catch (error) {
       console.error(error);
     }
